@@ -13,3 +13,25 @@
      最后，根据译码的信息和分支预测的信息生成下一条指令的PC。
   6. 来自commit模块的冲刷管线请求会复位PC值。
 */
+
+
+//=====================================================================
+//
+// Designer   : Bob Hu
+//
+// Description:
+//  The IFU to implement entire instruction fetch unit.
+//
+// ====================================================================
+
+`include "defines.v"
+
+module ifu (
+    output [`PC_SIZE-1:0] inspect_pc,
+    output ifu_active,
+    input itcm_nohold,
+    input [`PC_SIZE-1:0] pc_rtvec,
+    
+);
+    
+endmodule
