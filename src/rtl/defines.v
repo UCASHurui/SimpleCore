@@ -61,6 +61,7 @@
 `define DECINFO_AGU_OP2IMM `DECINFO_AGU_USIGN+1                         //7
 `define DECINFO_AGU_WIDTH `DECINFO_AGU_OP2IMM+1                         //total 8-bits
 
+
 `define DECINFO_WIDTH `DECINFO_ALU_WIDTH                                //since ALU info bus is the longest
 `define ALU_ADDER_WIDTH `XLEN+1                                         //33-bits
 
