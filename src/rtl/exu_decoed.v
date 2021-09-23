@@ -14,7 +14,7 @@ Modules: exu_decode
 module exu_decode (
     input[`INSTR_SIZE-1: 0] i_instr,
     input[`PC_SIZE-1:0] i_pc,
-    input i_prdt_taken;
+    input i_prdt_taken,
     
     //regfile ralated
     output dec_rs1en,
@@ -23,7 +23,7 @@ module exu_decode (
     output [`RFIDX_WIDTH-1:0] dec_rs1idx,
     output [`RFIDX_WIDTH-1:0] dec_rs2idx,
     output [`RFIDX_WIDTH-1:0] dec_rdidx,
-    output [`DEC_INFO_WIDTH-1:0] dec_info,
+    output [`DECINFO_WIDTH-1:0] dec_info,
     output [`XLEN-1:0] dec_imm,
     output [`PC_SIZE-1:0] dec_pc,
     output dec_illegal,
@@ -51,7 +51,6 @@ wire opcode_4_2_101 = i_instr[4:2] == 3'b101;
 wire opcode_4_2_111 = i_instr[4:2] == 3'b111;
 
 wire opcode_6_5_00 = i_instr[6:5] == 2'b00;
-wire opcode_6_5_01 = i_instr[6:5] == 2'b01;
 wire opcode_6_5_01 = i_instr[6:5] == 2'b01;
 wire opcode_6_5_11 = i_instr[6:5] == 2'b11;
 
@@ -96,7 +95,7 @@ wire rv32_bgeu = rv32_branch & func3_111;
 wire bjp_op = rv32_branch | rv32_jal | rv32_jalr;
 
 wire [`DECINFO_BJP_WIDTH-1:0] bjp_info_bus;
-assign bjp_info_bus[`DECINFO_GRP] = `DECINFO_GRP_BJP //group
+assign bjp_info_bus[`DECINFO_GRP] = `DECINFO_GRP_BJP; //group
 assign bjp_info_bus[`DECINFO_BJP_JUMP] = rv32_jal | rv32_jalr;
 assign bjp_info_bus[`DECINFO_BJP_BPRDT] = i_prdt_taken;
 assign bjp_info_bus[`DECINFO_BJP_BEQ] = rv32_beq;
@@ -115,12 +114,11 @@ wire rv32_sltiu = rv32_op_imm & func3_011;
 wire rv32_xori = rv32_op_imm & func3_100;
 wire rv32_ori = rv32_op_imm & func3_110;
 wire rv32_andi = rv32_op_imm & func3_111;
-wire rv32_slli = rv32_op_imm & func3_001;
+wire rv32_slli = rv32_op_imm & func3_001 & func7_0000000;
 wire rv32_srli = rv32_op_imm & func3_101 & func7_0000000;
 wire rv32_srai = rv32_op_imm & func3_101 &func7_0100000;
-wire rv32_op_imm_sxxi  = rv32_op_imm & (func3_001 | func3_101) 
-
-wire rv32_nop = rv32_addi & rs1_x0 & rd_x0 & (~(|i_instr[31:20]))// use addi x0, x0, 0 for nop instruction
+wire rv32_op_imm_sxxi  = rv32_slli | rv32_srli | rv32_srai;
+wire rv32_nop = rv32_addi & rs1_x0 & rd_x0 & (~(|i_instr[31:20]));// use addi x0, x0, 0 for nop instruction
 
 wire rv32_add = rv32_op & func3_000 & func7_0000000;
 wire rv32_sub = rv32_op & func3_000 & func7_0100000;
@@ -144,7 +142,7 @@ wire rv32_remu = rv32_op & func3_111 & func7_0000001;
 
 //=================================================
 //decode info of 1cycle ALU group(excluding MULDIV)
-alu_op = (~rv32_shamt_illegal)
+wire alu_op = (~rv32_shamt_illegal)
                 & (rv32_lui
                 | rv32_auipc
                 | rv32_op_imm
@@ -159,7 +157,7 @@ assign alu_info_bus[`DECINFO_ALU_SLT] = rv32_slt | rv32_slti;
 assign alu_info_bus[`DECINFO_ALU_SLTU] = rv32_sltu | rv32_sltiu;
 assign alu_info_bus[`DECINFO_ALU_XOR] = rv32_xor | rv32_xori;
 assign alu_info_bus[`DECINFO_ALU_OR] = rv32_or | rv32_ori;
-assign alu_info_bus[`DECINFO_ALU_AND] = rv32_and | rv32andi;
+assign alu_info_bus[`DECINFO_ALU_AND] = rv32_and | rv32_andi;
 assign alu_info_bus[`DECINFO_ALU_SLL] = rv32_sll | rv32_slli;
 assign alu_info_bus[`DECINFO_ALU_SRL] = rv32_srl | rv32_srli;
 assign alu_info_bus[`DECINFO_ALU_SRA] = rv32_sra | rv32_srai;
@@ -170,7 +168,7 @@ assign alu_info_bus[`DECINFO_ALU_NOP] = rv32_nop;
 
 //=================================================
 //decode info of MUL/DIV ALU group
-muldiv_op = rv32_op & func7_0000001;
+wire muldiv_op = rv32_op & func7_0000001;
 
 wire [`DECINFO_MULDIV_WIDTH-1:0] muldiv_info_bus;
 assign muldiv_info_bus[`DECINFO_GRP] = `DECINFO_GRP_MULDIV;
@@ -187,11 +185,11 @@ assign muldiv_info_bus[`DECINFO_MULDIV_REMU] = rv32_remu;
 
 //=================================================
 //load/store instructions
-wire rv32_lb = rv32_load & fun3_000;
-wire rv32_lh = rv32_load & fun3_001;
-wire rv32_lw = rv32_load & fun3_010;
-wire rv32_lbu = rv32_load & fun3_100;
-wire rv32_lhu = rv32_load & fun3_101;
+wire rv32_lb = rv32_load & func3_000;
+wire rv32_lh = rv32_load & func3_001;
+wire rv32_lw = rv32_load & func3_010;
+wire rv32_lbu = rv32_load & func3_100;
+wire rv32_lhu = rv32_load & func3_101;
 
 wire rv32_sb = rv32_store & func3_000;
 wire rv32_sh = rv32_store & func3_001;
@@ -200,7 +198,7 @@ wire rv32_sw = rv32_store & func3_010;
 //=================================================
 //decode info of load/store group
 wire ls_op = rv32_load | rv32_store;
-wire lsu_info_size = i_instr[13:12];
+wire [1:0] lsu_info_size = i_instr[13:12];
 wire lsu_info_usign = i_instr[14];
 
 wire [`DECINFO_AGU_WIDTH-1:0] agu_info_bus;
@@ -224,7 +222,7 @@ wire rs1_x0 = rs1_idx == {`RFIDX_WIDTH{1'b0}};
 wire rd_x0 = rd_idx == {`RFIDX_WIDTH{1'b0}};
 wire rs1_x31 = rs1_idx == {`RFIDX_WIDTH{1'b1}};
 wire rs2_x31 = rs1_idx == {`RFIDX_WIDTH{1'b1}};
-wire rd_x31 = rd_idx == {`RFIDX_WIDTH{1'b1}}
+wire rd_x31 = rd_idx == {`RFIDX_WIDTH{1'b1}};
 
 //=================================================
 //immediate
@@ -234,24 +232,16 @@ wire rv32_imm_sel_b = rv32_branch;
 wire rv32_imm_sel_u = rv32_lui | rv32_auipc;
 wire rv32_imm_sel_j = rv32_jal;
 wire need_imm = ~rv32_op;
-wire[`XLEN-1:0] rv32_i_imm = {19{i_instr[31]},  
-                                                 i_instr[31], 
-                                                 i_instr[30:25], 
-                                                 i_instr[24:19], 
-                                                 i_instr[20]};
-wire[`XLEN-1:0] rv32_s_imm = {19{i_instr[31]},
-                                                 i_instr[31], 
-                                                 i_instr[30:25], 
-                                                 i_instr[11:8], 
-                                                 i_instr[7]};
-wire[`XLEN-1:0] rv32_b_imm = {19{i_instr[31]},
+wire[`XLEN-1:0] rv32_i_imm =  {{20{i_instr[31]}},i_instr[31:20]};
+wire[`XLEN-1:0] rv32_s_imm = {{20{i_instr[31]}},i_instr[31], i_instr[30:25],i_instr[11:8], i_instr[7]};
+wire[`XLEN-1:0] rv32_b_imm = {{20{i_instr[31]}},
                                                  i_instr[7], 
                                                  i_instr[30:25], 
                                                  i_instr[11:8], 
                                                  1'b0};
 wire[`XLEN-1:0] rv32_u_imm ={i_instr[31:12],
                                                 12'b0};
-wire[`XLEN-1:0] rv32_j_imm = {11{i_instr[31]},
+wire[`XLEN-1:0] rv32_j_imm = {{11{i_instr[31]}},
                                                 i_instr[31],
                                                 i_instr[19:12],
                                                 i_instr[20],
@@ -270,21 +260,13 @@ wire all_zeros_illegal = opcode_1_0_00
 wire all_ones_illegal = opcode_1_0_11
                                     & opcode_4_2_111
                                     & opcode_6_5_11
-                                    & rd_x32
+                                    & rd_x31
                                     & func3_111
                                     & rs1_x31
                                     & rs2_x31
                                     & func7_1111111;
-wire rv32_shamt_illegal = rv32_op_imm_sxxi & (i_instr[24] ~= 0)
-wire rv32_legal_ops = rv32_lui
-                            | rv32_auipc
-                            | rv32_jal
-                            | rv32_jalr
-                            | rv32_branch
-                            | rv32_load
-                            | rv32_store
-                            | rv32_op_imm
-                            | rv32_op;
+wire rv32_shamt_illegal = rv32_op_imm_sxxi & (i_instr[24] != 0);
+wire rv32_legal_ops = alu_op | muldiv_op | ls_op | bjp_op;
 
 
 
@@ -298,11 +280,11 @@ assign dec_rdidx = rd_idx;
 assign dec_rdwen = need_rd;
 assign dec_jalr_rs1idx = rs1_idx;
 assign dec_pc = i_pc;
-assign dec_imm = (`XLEN{rv32_imm_sel_i} & rv32_i_imm)
-                            | (`XLEN{rv32_imm_sel_s} & rv32_s_imm)
-                            | (`XLEN{rv32_imm_sel_b} & rv32_b_imm)
-                            | (`XLEN{rv32_imm_sel_u} & rv32_u_imm)
-                            | (`XLEN{rv32_imm_sel_j} & rv32_j_imm);
+assign dec_imm = ({`XLEN{rv32_imm_sel_i}} & rv32_i_imm)
+                            | ({`XLEN{rv32_imm_sel_s}} & rv32_s_imm)
+                            | ({`XLEN{rv32_imm_sel_b}} & rv32_b_imm)
+                            | ({`XLEN{rv32_imm_sel_u}} & rv32_u_imm)
+                            | ({`XLEN{rv32_imm_sel_j}} & rv32_j_imm);
 assign dec_illegal = all_ones_illegal
                                 | all_zeros_illegal
                                 | rv32_shamt_illegal
@@ -310,9 +292,11 @@ assign dec_illegal = all_ones_illegal
 assign dec_jal = rv32_jal;
 assign dec_jalr = rv32_jalr;
 assign dec_bjp = bjp_op;
-assign dec_bjp_imm = rv32_imm;
+assign dec_bjp_imm =({`XLEN{rv32_jalr}} & rv32_i_imm)
+                            | ({`XLEN{rv32_branch}} & rv32_b_imm)
+                            | ({`XLEN{rv32_jal}} & rv32_j_imm);
 assign dec_bxx = rv32_branch;
-assign dec_info = {`DECINFO_WIDTH{bjp_op}&
+assign dec_info = {{`DECINFO_WIDTH{bjp_op}}&
                             {{`DECINFO_WIDTH-`DECINFO_BJP_WIDTH{1'b0}},bjp_info_bus}}
                             | ({`DECINFO_WIDTH{alu_op}} & 
                             {{`DECINFO_WIDTH-`DECINFO_ALU_WIDTH{1'b0}},
