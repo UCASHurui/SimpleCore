@@ -107,6 +107,7 @@ module ifu_bpu(
 
   sirv_gnrl_dfflr #(1) rs1xn_rdrf_dfflrs(rs1xn_rdrf_ena, rs1xn_rdrf_nxt, rs1xn_rdrf_r, clk, rst_n);
 
+  // generate enable signal of using ReadPort1 in RegFile, the signal loads rs1 index register to read RegFile. (BPU2RegFile_rs1_enable)
   assign bpu2rf_rs1_ena = rs1xn_rdrf_set;
 
   /*
@@ -134,7 +135,7 @@ module ifu_bpu(
   */
   assign prdt_pc_add_op1 = (dec_bxx | dec_jal) ? pc[`PC_SIZE-1:0]                       // 1
                          : (dec_jalr & dec_jalr_rs1x0) ? `PC_SIZE'b0                    // 2.1
-                         : (dec_jalr & dec_jalr_rs1x1) ? rf2bpu_x1[`PC_SIZE-1:0]        //2.2
+                         : (dec_jalr & dec_jalr_rs1x1) ? rf2bpu_x1[`PC_SIZE-1:0]        // 2.2
                          : rf2bpu_rs1[`PC_SIZE-1:0];                                    // 2.3
  
   // ADDER operation 2, represent offset by immediate number
