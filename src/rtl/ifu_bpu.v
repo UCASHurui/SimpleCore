@@ -80,6 +80,16 @@ module ifu_bpu(
   wire dec_jalr_rs1x1 = (dec_jalr_rs1idx == `RFIDX_WIDTH'd1);    //discriminate rs1 index is x1
   wire dec_jalr_rs1xn = (~dec_jalr_rs1x0) & (~dec_jalr_rs1x1);   //discriminate rs1 index is xn, which is any other register than x0 and x1.
 
+
+  /*
+  Dependency check:
+     ** x1 is DEPENDENT when:
+        1. OITF is NOT empty, indicates long instruction being excuted
+        2. Index of target write-back register of current instruction in IR is x1, indicates ReadAfterWrite dependency  
+     ** xn is DEPENDENT when:
+        1. OITF is NOT empty, indicates long instruction being excuted
+        2. IR is NOT empty, indicates instruction in IR may be able to write back to xn. 
+  */
   wire jalr_rs1x1_dep = dec_i_valid & dec_jalr & dec_jalr_rs1x1 & ((~oitf_empty) | (jalr_rs1idx_cam_irrdidx));
   wire jalr_rs1xn_dep = dec_i_valid & dec_jalr & dec_jalr_rs1xn & ((~oitf_empty) | (~ir_empty));
 
