@@ -17,10 +17,10 @@
 
 //=====================================================================
 //
-// Designer   : Bob Hu
+// Author : LI Jiarui 
 //
 // Description:
-//  The IFU to implement entire instruction fetch unit.
+//  The instruction fetch unit(IFU) of SimpleCore.
 //
 // ====================================================================
 
@@ -31,30 +31,7 @@ module ifu (
     output ifu_active,
     input itcm_nohold,
     input [`PC_SIZE-1:0] pc_rtvec,
-     `ifdef E203_HAS_ITCM //{
-  input  ifu2itcm_holdup,
-  //input  ifu2itcm_replay,
-
-  // The ITCM address region indication signal
-  input [`E203_ADDR_SIZE-1:0] itcm_region_indic,
-
-  //////////////////////////////////////////////////////////////
-  //////////////////////////////////////////////////////////////
-  // Bus Interface to ITCM, internal protocol called ICB (Internal Chip Bus)
-  //    * Bus cmd channel
-  output ifu2itcm_icb_cmd_valid, // Handshake valid
-  input  ifu2itcm_icb_cmd_ready, // Handshake ready
-            // Note: The data on rdata or wdata channel must be naturally
-            //       aligned, this is in line with the AXI definition
-  output [`E203_ITCM_ADDR_WIDTH-1:0]   ifu2itcm_icb_cmd_addr, // Bus transaction start addr 
-
-  //    * Bus RSP channel
-  input  ifu2itcm_icb_rsp_valid, // Response valid 
-  output ifu2itcm_icb_rsp_ready, // Response ready
-  input  ifu2itcm_icb_rsp_err,   // Response error
-            // Note: the RSP rdata is inline with AXI definition
-  input  [`E203_ITCM_DATA_WIDTH-1:0] ifu2itcm_icb_rsp_rdata, 
-  `endif//}
+   
 
   `ifdef E203_HAS_MEM_ITF //{
   //////////////////////////////////////////////////////////////
@@ -80,13 +57,13 @@ module ifu (
   //////////////////////////////////////////////////////////////
   //////////////////////////////////////////////////////////////
   // The IR stage to EXU interface
-  output [`E203_INSTR_SIZE-1:0] ifu_o_ir,// The instruction register
-  output [`E203_PC_SIZE-1:0] ifu_o_pc,   // The PC register along with
+  output [`INSTR_SIZE-1:0] ifu_o_ir,// The instruction register
+  output [`PC_SIZE-1:0] ifu_o_pc,   // The PC register along with
   output ifu_o_pc_vld,
   output ifu_o_misalgn,                  // The fetch misalign 
   output ifu_o_buserr,                   // The fetch bus error
-  output [`E203_RFIDX_WIDTH-1:0] ifu_o_rs1idx,
-  output [`E203_RFIDX_WIDTH-1:0] ifu_o_rs2idx,
+  output [`RFIDX_WIDTH-1:0] ifu_o_rs1idx,
+  output [`RFIDX_WIDTH-1:0] ifu_o_rs2idx,
   output ifu_o_prdt_taken,               // The Bxx is predicted as taken
   output ifu_o_muldiv_b2b,               
   output ifu_o_valid, // Handshake signals with EXU stage
