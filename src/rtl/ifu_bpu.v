@@ -92,11 +92,13 @@ module ifu_bpu(
   */
   wire jalr_rs1x1_dep = dec_i_valid & dec_jalr & dec_jalr_rs1x1 & ((~oitf_empty) | (jalr_rs1idx_cam_irrdidx));
   wire jalr_rs1xn_dep = dec_i_valid & dec_jalr & dec_jalr_rs1xn & ((~oitf_empty) | (~ir_empty));
-
-                      // If only depend to IR stage (OITF is empty), then if IR is under clearing, or
-                          // it does not use RS1 index, then we can also treat it as non-dependency
+ 
+  // If only depend to IR stage (OITF is empty), then if IR is under clearing, or
+  // it does not use RS1 index, then we can also treat it as non-dependency
   wire jalr_rs1xn_dep_ir_clr = (jalr_rs1xn_dep & oitf_empty & (~ir_empty)) & (ir_valid_clr | (~ir_rs1en));
 
+
+  // To read xn from ReadPort1 in RegFile, discriminate if ReadPort1 is available and non-conflict
   wire rs1xn_rdrf_r;
   wire rs1xn_rdrf_set = (~rs1xn_rdrf_r) & dec_i_valid & dec_jalr & dec_jalr_rs1xn & ((~jalr_rs1xn_dep) | jalr_rs1xn_dep_ir_clr);
   wire rs1xn_rdrf_clr = rs1xn_rdrf_r;
@@ -109,7 +111,9 @@ module ifu_bpu(
 
   /*
   To set when bpu needs to wait.
-  1. 
+  1. x1 dependency exists
+  2. xn dependency exists
+  3. At clock period of reading xn from RegFile using ReadPort1 in RegFile, here to stop IFU from generating next PC till dependency discharged and xn is read from RegFile
   */
   assign bpu_wait = jalr_rs1x1_dep | jalr_rs1xn_dep | rs1xn_rdrf_set;
 
