@@ -1,6 +1,9 @@
+`include "config.v"
+
 `define PC_SIZE 32                 //  PC width
 `define XLEN 32                     //  regfile reg width  
 `define RFIDX_WIDTH 5        //   regfile addr width
+`define RFREG_NUM 32        // number of registers
 `define INSTR_SIZE 32          //    instruction size
 
 //Decode info bus macros
@@ -62,6 +65,20 @@
 `define DECINFO_AGU_WIDTH `DECINFO_AGU_OP2IMM+1               //8
 
 `define DECINFO_WIDTH `DECINFO_ALU_WIDTH//since ALU info bus is the longest
+
+`ifdef CFG_OITF_DEPTH_IS_4
+    `define OITF_DEPTH 4
+    `define OITF_DEPTH_IS_4
+    `define ITAG_WIDTH 2
+`elsif CFG_OITF_DEPTH_IS_2
+    `define OITF_DEPTH 2
+    `define OITF_DEPTH_IS_2
+    `define ITAG_WIDTH 1
+`elsif CFG_OITF_DEPTH_IS_1
+    `define  OITF_DEPTH 1
+    `define OITF_DEPTH_IS_1
+    `define ITAG_WIDTH 1
+`endif
 
 
 
