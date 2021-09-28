@@ -1,0 +1,19 @@
+module exu_longpwbck (
+    //LSU write-back interface
+    input lsu_wbck_i_valid,
+    output lsu_wback_i_ready,
+    input [`XLEN-1:0] lsu_wbck_i_data,
+    input [`ITAG_WIDTH-1:0] lsu_wbck_i_itag,
+    //input lsu_wbck_i_err,
+    //input [`ADDR_SIZE-1:0] lsu_cmt_i_badaddr,
+    input lsu_cmt_i_ld,
+    output lsu_cmt_i_st,
+    
+    //long pipe write back to final write back interface
+    input longp_wbck_o_valid,
+    output longp_wbck_o_ready,
+    output [`XLEN-1:0] longp_wbck_o_data,
+    output [`RFIDX_WIDTH-1:0] longp_wbck_o_rdidx,
+    //itag of the toppest entry of OITF
+    input oitf_empty,
+);
