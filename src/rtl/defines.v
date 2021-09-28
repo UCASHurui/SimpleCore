@@ -1,7 +1,11 @@
+`include "config.v"
+
 `define PC_SIZE 32                                                      //PC width
 `define XLEN 32                                                         //regfile reg width  
 `define RFIDX_WIDTH 5                                                   //regfile addr width
 `define INSTR_SIZE 32                                                   //instruction size
+`define RFREG_NUM 32                                                    // number of registers
+
 
 //Decode info bus macros
 `define DECINFO_GRP_WIDTH 2 //4 group in total(ALU, BJP, MULDIV, AGU)
@@ -61,6 +65,19 @@
 `define DECINFO_AGU_OP2IMM `DECINFO_AGU_USIGN+1                         //7
 `define DECINFO_AGU_WIDTH `DECINFO_AGU_OP2IMM+1                         //total 8-bits
 
+`ifdef CFG_OITF_DEPTH_IS_4
+    `define OITF_DEPTH 4
+    `define OITF_DEPTH_IS_4
+    `define ITAG_WIDTH 2
+`elsif CFG_OITF_DEPTH_IS_2
+    `define OITF_DEPTH 2
+    `define OITF_DEPTH_IS_2
+    `define ITAG_WIDTH 1
+`elsif CFG_OITF_DEPTH_IS_1
+    `define  OITF_DEPTH 1
+    `define OITF_DEPTH_IS_1
+    `define ITAG_WIDTH 1
+`endif
 
 `define DECINFO_WIDTH `DECINFO_ALU_WIDTH                                //since ALU info bus is the longest
 `define ALU_ADDER_WIDTH `XLEN+1                                         //33-bits
