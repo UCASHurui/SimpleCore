@@ -35,5 +35,5 @@ def auto_wire(f_path):
     return '\n'.join(output_list)
 
 if __name__ == "__main__":
-    f_path = "module_def.txt"
+    f_path = "./src/utils/module_def.txt"
     print(auto_wire(f_path))

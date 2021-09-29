@@ -43,9 +43,6 @@ module exu_alu_lsuagu(
   input                        agu_rsp_valid,       // Response valid 
   output                       agu_rsp_ready,       // Response ready
 
-  // the RSP rdata is inline with AXI definition
-  input  [`XLEN-1:0]      agu_rsp_rdata,
-
   //////////////////////////////////////////////////////////////
   //  AGU must be shared with ALU.
   output [`XLEN-1:0] agu_req_alu_op1,
