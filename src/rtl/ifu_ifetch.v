@@ -447,13 +447,13 @@ module ifu_ifetch(
   assign ifu_req_seq = (~pipe_flush_req_real) & (~ifu_reset_req) & (~ifetch_replay_req) & (~bjp_req);
   // assign ifu_req_seq_rv32 = minidec_rv32;  // since all instruction is in 32 bit
   assign ifu_req_last_pc = pc_r;
-
+//1
   assign pc_nxt_pre = pc_add_op1 + pc_add_op2;
-  /*
-  `ifndef E203_TIMING_BOOST//}
+  
+  `ifndef TIMING_BOOST//}
   assign pc_nxt = {pc_nxt_pre[`PC_SIZE-1:1],1'b0};
   `else//}{
-  */
+  
   assign pc_nxt = 
                pipe_flush_req ? {pipe_flush_pc[`PC_SIZE-1:1],1'b0} :
                dly_pipe_flush_req ? {pc_r[`PC_SIZE-1:1],1'b0} :
@@ -461,14 +461,19 @@ module ifu_ifetch(
   `endif//}
 
   // The Ifetch issue new ifetch request when
-  //   * If it is a bjp insturction, and it does not need to wait, and it is not a replay-set cycle
-  //   * and there is no halt_request
+  //  1. it is a bjp insturction
+  //  2. it does not need to wait
+  //  3. it is not a replay-set cycle
+  //  4. there is no halt_request
   wire ifu_new_req = (~bpu_wait) & (~ifu_halt_req) & (~reset_flag_r) & (~ifu_rsp_need_replay);
+
 
   // The fetch request valid is triggering when
   //      * New ifetch request
   //      * or The flush-request is pending
   wire ifu_req_valid_pre = ifu_new_req | ifu_reset_req | pipe_flush_req_real | ifetch_replay_req;
+ 
+ 
   // The new request ready condition is:
   //   * No outstanding reqeusts
   //   * Or if there is outstanding, but it is reponse valid back
@@ -492,7 +497,7 @@ module ifu_ifetch(
   // The PC will need to be updated when ifu req channel handshaked or a flush is incoming
   wire pc_ena = ifu_req_hsked | pipe_flush_hsked;
 
-  gnrl_dfflr #(`E203_PC_SIZE) pc_dfflr (pc_ena, pc_nxt, pc_r, clk, rst_n);
+  gnrl_dfflr #(`PC_SIZE) pc_dfflr (pc_ena, pc_nxt, pc_r, clk, rst_n);
 
 
  assign inspect_pc = pc_r;

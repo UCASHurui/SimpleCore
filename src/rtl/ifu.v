@@ -65,7 +65,7 @@ module ifu (
   output [`RFIDX_WIDTH-1:0] ifu_o_rs1idx,
   output [`RFIDX_WIDTH-1:0] ifu_o_rs2idx,
   output ifu_o_prdt_taken,               // The Bxx is predicted as taken
-  output ifu_o_muldiv_b2b,               
+  //output ifu_o_muldiv_b2b,               
   output ifu_o_valid, // Handshake signals with EXU stage
   input  ifu_o_ready,
 
@@ -87,8 +87,9 @@ module ifu (
   output ifu_halt_ack,
 
   input  oitf_empty,
-  input  [`E203_XLEN-1:0] rf2ifu_x1,
-  input  [`E203_XLEN-1:0] rf2ifu_rs1,
+  //Regfile to ifu interface
+  input  [`XLEN-1:0] rf2ifu_x1,
+  input  [`XLEN-1:0] rf2ifu_rs1,
   input  dec2ifu_rden,
   input  dec2ifu_rs1en,
   input  [`E203_RFIDX_WIDTH-1:0] dec2ifu_rdidx,

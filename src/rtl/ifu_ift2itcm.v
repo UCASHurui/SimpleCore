@@ -11,12 +11,10 @@
 `include "defines.v"
 
 
-module ifu_ift2icb(
+module ifu_ift2itcm(
 
-
-  input  itcm_nohold,
-  //////////////////////////////////////////////////////////////
-  //////////////////////////////////////////////////////////////
+  //input  itcm_nohold,
+  
   // Fetch Interface to memory system, internal protocol
   //    * IFetch REQ channel
   input  ifu_req_valid, // Handshake valid
@@ -42,13 +40,24 @@ module ifu_ift2icb(
   //output ifu_rsp_replay,   // Response error
   output [32-1:0] ifu_rsp_instr, // Response instruction
 
-  //`ifdef HAS_ITCM 
-  //{
-  //////////////////////////////////////////////////////////////
-  //////////////////////////////////////////////////////////////
-  // The ITCM address region indication signal
+ 
   input [`ADDR_SIZE-1:0] itcm_region_indic,
+  output ifu2itcm_cmd_valid, // Handshake valid
+  input  ifu2itcm_cmd_ready, // Handshake ready
+  output [`ITCM_ADDR_WIDTH-1:0]   ifu2itcm_addr //transcation to itcm start address
+  
+  input  ifu2itcm_rsp_valid, // Response valid 
+  output ifu2itcm_rsp_ready, // Response ready
+  input  ifu2itcm_rsp_err,   // Response error
+            // Note: the RSP rdata is inline with AXI definition
+  input  [`ITCM_DATA_WIDTH-1:0] ifu2itcm_rsp_rdata, 
+
+  // ********************* Original IFU to ICB to ITCM ******************************
   // Bus Interface to ITCM, internal protocol called ICB (Internal Chip Bus)
+  /*
+  `ifdef HAS_ITCM 
+  // The ITCM address region indication signal
+  input [`E203_ADDR_SIZE-1:0] itcm_region_indic,
   //    * Bus cmd channel
   output ifu2itcm_icb_cmd_valid, // Handshake valid
   input  ifu2itcm_icb_cmd_ready, // Handshake ready
@@ -64,11 +73,10 @@ module ifu_ift2icb(
   input  [`ITCM_DATA_WIDTH-1:0] ifu2itcm_icb_rsp_rdata, 
 
   `endif//}
+  */
 
  /*
   `ifdef E203_HAS_MEM_ITF //{
-  //////////////////////////////////////////////////////////////
-  //////////////////////////////////////////////////////////////
   // Bus Interface to System Memory, internal protocol called ICB (Internal Chip Bus)
   //    * Bus cmd channel
   output ifu2biu_icb_cmd_valid, // Handshake valid
@@ -86,26 +94,23 @@ module ifu_ift2icb(
   
   //input  ifu2biu_replay,
   `endif//}
-  */
+   */
 
-  // The holdup indicating the target is not accessed by other agents 
-  // since last accessed by IFU, and the output of it is holding up
-  // last value. 
+  // The holdup indicating the target is not accessed by other agents since last accessed by IFU, and the output of it is holding up last value. 
+  /*
   `ifdef E203_HAS_ITCM //{
   input  ifu2itcm_holdup,
   //input  ifu2itcm_replay,
   `endif//}
+  */
+  input  ifu2itcm_holdup,
 
   input  clk,
   input  rst_n
   );
 
-`ifndef E203_HAS_ITCM
-  `ifndef E203_HAS_MEM_ITF
-    !!! ERROR: There is no ITCM and no System interface, where to fetch the instructions? must be wrong configuration.
-  `endif//}
-`endif//}
 
+ 
 
 /////////////////////////////////////////////////////////
 // We need to instante this bypbuf for several reasons:
@@ -119,9 +124,9 @@ module ifu_ift2icb(
   wire i_ifu_rsp_valid;
   wire i_ifu_rsp_ready;
   wire i_ifu_rsp_err;
-  wire [`E203_INSTR_SIZE-1:0] i_ifu_rsp_instr;
-  wire [`E203_INSTR_SIZE+1-1:0]ifu_rsp_bypbuf_i_data;
-  wire [`E203_INSTR_SIZE+1-1:0]ifu_rsp_bypbuf_o_data;
+  wire [`INSTR_SIZE-1:0] i_ifu_rsp_instr;
+  wire [`INSTR_SIZE+1-1:0]ifu_rsp_bypbuf_i_data;
+  wire [`INSTR_SIZE+1-1:0]ifu_rsp_bypbuf_o_data;
 
   assign ifu_rsp_bypbuf_i_data = {
                           i_ifu_rsp_err,
@@ -151,9 +156,7 @@ module ifu_ift2icb(
   );
 
 // ===========================================================================
-//////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////
-/////// The itfctrl scheme introduction
+//                   The itfctrl scheme introduction
 //
 // The instruction fetch is very tricky due to two reasons and purposes:
 //   (1) We want to save area and dynamic power as much as possible
@@ -162,12 +165,11 @@ module ifu_ift2icb(
 // In order to acheive above-mentioned purposes we define the tricky
 //   fetch scheme detailed as below.
 //
-///////
+// 
 // Firstly, several phrases are introduced here:
-//   * Fetching target: the target address region including
-//         ITCM,
+//   * Fetching target: the target address region including ITCM,
 //         System Memory Fetch Interface or ICache
-//            (Note: Sys Mem and I cache are Exclusive with each other)
+//            (Note: Sys Mem and I-cache are Exclusive with each other)
 //   * Fetching target's Lane: The Lane here means the fetching 
 //       target can read out one lane of data at one time. 
 //       For example: 
@@ -267,9 +269,11 @@ module ifu_ift2icb(
 //
 // ===========================================================================
 
+  /*
   `ifdef E203_HAS_ITCM //{
   wire ifu_req_pc2itcm = (ifu_req_pc[`E203_ITCM_BASE_REGION] == itcm_region_indic[`E203_ITCM_BASE_REGION]); 
   `endif//}
+
 
   `ifdef E203_HAS_MEM_ITF //{
   wire ifu_req_pc2mem = 1'b1
@@ -278,8 +282,13 @@ module ifu_ift2icb(
             `endif//}
               ;
   `endif//}
+   */
+   
+   // Needs to define ITCM_BASE_REGION
+   wire ifu_req_pc2itcm = (ifu_req_pc[`ITCM_BASE_REGION] == itcm_region_indic[`ITCM_BASE_REGION]); 
 
   // The current accessing PC is crossing the lane boundry
+  /*
   wire ifu_req_lane_cross = 1'b0
                     `ifdef E203_HAS_ITCM //{
                          | (
@@ -304,8 +313,12 @@ module ifu_ift2icb(
                            )
                     `endif//}
                     ;
+  */
+   wire ifu_req_lane_cross = 1'b0 | ( ifu_req_pc2itcm & (ifu_req_pc[1] == 1'b1))
+                                           
 
   // The current accessing PC is begining of the lane boundry
+  /*
   wire ifu_req_lane_begin = 1'b0
                     `ifdef E203_HAS_ITCM //{
                          | (
@@ -330,7 +343,10 @@ module ifu_ift2icb(
                            )
                     `endif//}
                     ;
-  
+  */
+ 
+  wire ifu_req_lane_begin = 1'b0 | ( ifu_req_pc2itcm & (ifu_req_pc[1] == 1'b0)) 
+                         
 
   // The scheme to check if the current accessing PC is same as last accessed ICB address
   //   is as below:
@@ -351,21 +367,26 @@ module ifu_ift2icb(
   wire ifu_req_lane_same = ifu_req_seq & (ifu_req_lane_begin ? req_lane_cross_r : 1'b1);
   
   // The current accessing PC is same as last accessed ICB address
-  wire ifu_req_lane_holdup = 1'b0
+  /*
+  wire ifu_req_lane_holdup = 1'b0 
             `ifdef E203_HAS_ITCM //{
             | (ifu_req_pc2itcm & ifu2itcm_holdup & (~itcm_nohold)) 
             `endif//}
             ;
+  */
+
+  wire ifu_req_lane_holdup = 1'b0 | ifu_req_pc2itcm  // & ifu2itcm_holdup & (~itcm_nohold)) 
 
   wire ifu_req_hsked = ifu_req_valid & ifu_req_ready;
   wire i_ifu_rsp_hsked = i_ifu_rsp_valid & i_ifu_rsp_ready;
+  /*
   wire ifu_icb_cmd_valid;
   wire ifu_icb_cmd_ready;
   wire ifu_icb_cmd_hsked = ifu_icb_cmd_valid & ifu_icb_cmd_ready;
   wire ifu_icb_rsp_valid;
   wire ifu_icb_rsp_ready;
   wire ifu_icb_rsp_hsked = ifu_icb_rsp_valid & ifu_icb_rsp_ready;
-
+  */
 
   /////////////////////////////////////////////////////////////////////////////////
   // Implement the state machine for the ifetch req interface
@@ -373,7 +394,7 @@ module ifu_ift2icb(
   wire req_need_2uop_r;
   wire req_need_0uop_r;
 
-
+  /*
   localparam ICB_STATE_WIDTH  = 2;
   // State 0: The idle state, means there is no any oustanding ifetch request
   localparam ICB_STATE_IDLE = 2'd0;
@@ -395,6 +416,7 @@ module ifu_ift2icb(
   wire state_1st_exit_ena      ;
   wire state_wait2nd_exit_ena  ;
   wire state_2nd_exit_ena      ;
+ 
 
   // Define some common signals and reused later to save gatecounts
   wire icb_sta_is_idle    = (icb_state_r == ICB_STATE_IDLE   );
@@ -457,8 +479,9 @@ module ifu_ift2icb(
               ;
 
   sirv_gnrl_dfflr #(ICB_STATE_WIDTH) icb_state_dfflr (icb_state_ena, icb_state_nxt, icb_state_r, clk, rst_n);
+   */
 
-  /////////////////////////////////////////////////////////////////////////////////
+  /*
   // Save the same_cross_holdup flags for this ifetch request to be used
   wire req_same_cross_holdup_r;
 
@@ -471,20 +494,24 @@ module ifu_ift2icb(
   sirv_gnrl_dfflr #(1) req_need_2uop_dfflr         (ifu_req_hsked, req_need_2uop,         req_need_2uop_r,         clk, rst_n);
   sirv_gnrl_dfflr #(1) req_need_0uop_dfflr         (ifu_req_hsked, req_need_0uop,         req_need_0uop_r,         clk, rst_n);
   sirv_gnrl_dfflr #(1) req_lane_cross_dfflr        (ifu_req_hsked, ifu_req_lane_cross,    req_lane_cross_r,        clk, rst_n);
+  */
+  
 
-  /////////////////////////////////////////////////////////////////////////////////
   // Save the indicate flags for this ICB transaction to be used
-  wire [`E203_PC_SIZE-1:0] ifu_icb_cmd_addr;
-  `ifdef E203_HAS_ITCM //{
-  wire ifu_icb_cmd2itcm;
-  wire icb_cmd2itcm_r;
-  sirv_gnrl_dfflr #(1) icb2itcm_dfflr(ifu_icb_cmd_hsked, ifu_icb_cmd2itcm, icb_cmd2itcm_r, clk, rst_n);
-  `endif//}
+  wire [`PC_SIZE-1:0] ifu_icb_cmd_addr;
+  // wire ['ITCM_RAM_AW-1:0] ifu2itcm_cmd_addr;
+  //`ifdef E203_HAS_ITCM //{
+  //wire ifu_icb_cmd2itcm;
+  //wire icb_cmd2itcm_r;
+  //sirv_gnrl_dfflr #(1) icb2itcm_dfflr(ifu_icb_cmd_hsked, ifu_icb_cmd2itcm, icb_cmd2itcm_r, clk, rst_n);
+  //`endif//}
+  /*
   `ifdef E203_HAS_MEM_ITF //{
   wire ifu_icb_cmd2biu ;
   wire icb_cmd2biu_r;
   sirv_gnrl_dfflr #(1) icb2mem_dfflr (ifu_icb_cmd_hsked, ifu_icb_cmd2biu , icb_cmd2biu_r,  clk, rst_n);
   `endif//}
+  */
   wire icb_cmd_addr_2_1_ena = ifu_icb_cmd_hsked | ifu_req_hsked;
   wire [1:0] icb_cmd_addr_2_1_r;
   sirv_gnrl_dffl #(2)icb_addr_2_1_dffl(icb_cmd_addr_2_1_ena, ifu_icb_cmd_addr[2:1], icb_cmd_addr_2_1_r, clk);
