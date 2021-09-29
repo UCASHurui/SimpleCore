@@ -81,5 +81,26 @@
 
 `define DECINFO_WIDTH `DECINFO_ALU_WIDTH                                //since ALU info bus is the longest
 `define ALU_ADDER_WIDTH `XLEN+1                                         //33-bits
+//ITCM related macros
+`define ITCM_ADDR_WIDTH 16  //16bit addr 64KB(addr of bytes)
+  // The ITCM size is 2^addr_width bytes, and ITCM is 32bits wide (4 bytes)
+  //  so the DP is 2^addr_wdith/4
+  //  so the AW is addr_wdith - 2
+`define ITCM_RAM_AW `ITCM_ADDR_WIDTH-2 //(addr of output(4bytes))
+`define ITCM_RAM_DP (1<<(`ITCM_ADDR_WIDTH - 2))//ITCM depth
+`define ITCM_RAM_DW 32//ITCM datawidth in bit
+`define ITCM_RAM_MW 4//ITCM mask width in bit
+
+//DTCM related macros
+`define DTCM_ADDR_WIDTH 16  //16bit addr 64KB(addr of bytes)
+  // The DTCM size is 2^addr_width bytes, and DTCM is 32bits wide (4 bytes)
+  //  so the DP is 2^addr_wdith/4
+  //  so the AW is addr_wdith - 2
+`define DTCM_RAM_AW `DTCM_ADDR_WIDTH-2 //(addr of output(4bytes))
+`define DTCM_RAM_DP (1<<(`DTCM_ADDR_WIDTH - 2))//DTCM depth
+`define DTCM_RAM_DW 32//DTCM datawidth in bit
+`define DTCM_RAM_MW 4//DTCM mask width in bit
+
+
 
 
