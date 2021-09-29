@@ -1,8 +1,29 @@
-module itcm_ram (
+module lsu_ctrl (
+    output lsu_o_valid,
+    input lsu_o_ready,
+    output [`XLEN-1:0] lsu_o_wbck_data,
+    output [`ITAG_WIDTH-1:0] lsu_o_wbck_itag,
+
+    input agu_cmd_valid,
+    output agu_cmd_ready,
+    input agu_cmd_read,
+    input [`DTCM_AW-1:0] agu_cmd_addr,
+    input [`XLEN-1:0] agu_cmd_wdata,
+    input [`XLEN/8-1:0] agu_cmd_wmask,
+    input [`ITAG_WIDTH-1:0] agu_cmd_itag,
+    output agu_rsp_valid,
+    input agu_rsp_ready,
+
+    output dtcm_cmd_valid,
+    input dtcm_cmd_ready,
+    output dtcm_cmd_read,
+    output [`DTCM_AW-1:0] dtcm_cmd_addr,
+    output [`XLEN-1:0] dtcm_cmd_wdata,
+    output [`XLEN/8-1:0] dtcm_cmd_wmask,
+    input dtcm_rsp_valid,
+    output dtcm_rsp_ready,
+    input [`XLEN-1:0] dtcm_rsp_rdata,
+    
     input clk,
-    input we,
-    input [`ITCM_RAM_AW-1:0] addr,
-    input [`ITCM_RAM_DW-1:0] din,
-    input [`ITCM_RAM_MW-1:0] wem,
-    output [`ITCM_RAM_DW-1:0] dout,
+    input rst_n
 );
