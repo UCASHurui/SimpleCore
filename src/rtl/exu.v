@@ -1,6 +1,6 @@
 //=================================================
-//Description: cpu top
+//Description: exu top
 //Author : Hurui
-//Modules: cpu + sram for sim
+//Modules: decode + disp + alu + commit + oitf + longp + wbck + regfile
 //=================================================
 `include "defines.v"

@@ -1,7 +1,7 @@
 //=================================================
-//Description: load store unit (simple wiring to lsu ctrl in this implementation)
+//Description: lsu top
 //Author : Hurui
-//Modules: lsu
+//Modules: instantiate lsu_ctrl
 //=================================================
 `include "defines.v"
 

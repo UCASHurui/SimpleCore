@@ -1,6 +1,6 @@
 //=================================================
-//Description: cpu top
+//Description: cpu module 
 //Author : Hurui
-//Modules: cpu + sram for sim
+//Modules: core + itcm_ctrl + dtcm_ctrl
 //=================================================
 `include "defines.v"
