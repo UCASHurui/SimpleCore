@@ -223,12 +223,12 @@ module ifu_ifu2itcm(
    // The fetched instruction from ITCM rdata bus 
   wire[31:0] ifu2itcm_icb_rsp_instr = ifu2itcm_rsp_rdata;
   wire ifu2itcm_cmd_valid; // Handshake valid
-  wire  ifu2itcm_cmd_ready; // Handshake ready
+  wire ifu2itcm_cmd_ready; // Handshake ready
   wire [`ITCM_ADDR_WIDTH-1:0]   ifu2itcm_addr; //transcation to itcm start address
   
-  wire  ifu2itcm_rsp_valid; // Response valid 
+  wire ifu2itcm_rsp_valid; // Response valid 
   wire ifu2itcm_rsp_ready; // Response ready
-  wire  ifu2itcm_rsp_err;   
+  wire ifu2itcm_rsp_err;   
 
  
   

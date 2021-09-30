@@ -54,6 +54,21 @@ module ifu (
   input   [`PC_SIZE-1:0] pipe_flush_pc,  
   `endif//}
   */
+  
+  input [`ADDR_SIZE-1:0] itcm_region_indic,
+  //ifu to itcm module
+  output ifu2itcm_cmd_valid, // Handshake valid
+  input  ifu2itcm_cmd_ready, // Handshake ready
+  // Note: The data on rdata or wdata channel must be naturally aligned, this is in line with the AXI definition
+  output [`ITCM_ADDR_WIDTH-1:0]   ifu2itcm_cmd_addr, // Bus transaction start addr 
+
+  //    * Bus RSP channel
+  input  ifu2itcm_rsp_valid, // Response valid 
+  output ifu2itcm_rsp_ready, // Response ready
+  //input  ifu2itcm_rsp_err,   // Response error 
+  // Note: the RSP rdata is inline with AXI definition
+  input  [`ITCM_DATA_WIDTH-1:0] ifu2itcm_icb_rsp_rdata, 
+  
       
   // The halt request come from other commit stage
   //   If the ifu_halt_req is asserting, then IFU will stop fetching new 
