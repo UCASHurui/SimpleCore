@@ -42,7 +42,7 @@ module ifu_ifu2itcm(
   input [`ADDR_SIZE-1:0] itcm_region_indic,
   output ifu2itcm_cmd_valid, // Handshake valid
   input  ifu2itcm_cmd_ready, // Handshake ready
-  output [`ITCM_ADDR_WIDTH-1:0]   ifu2itcm_addr, //transcation to itcm start address
+  output [`ITCM_ADDR_WIDTH-1:0]   ifu2itcm_cmd_addr, //transcation to itcm start address
   output [`ITCM_RAM_AW-1:0] itcm_ram_addr,
   
   input  ifu2itcm_rsp_valid, // Response valid 
@@ -207,8 +207,8 @@ module ifu_ifu2itcm(
 
   
 
-  // Save the indicate flags for this ICB transaction to be used
-  wire [`PC_SIZE-1:0] ifu2itcm_cmd_addr;
+  // Save the indicate flags for this transaction to be used, definitions downwards
+  //wire [`PC_SIZE-1:0] ifu2itcm_cmd_addr;
   // wire ['ITCM_RAM_AW-1:0] ifu2itcm_cmd_addr;
      
   // Generate the ifetch response channel
@@ -224,7 +224,7 @@ module ifu_ifu2itcm(
   wire[31:0] ifu2itcm_icb_rsp_instr = ifu2itcm_rsp_rdata;
   wire ifu2itcm_cmd_valid; // Handshake valid
   wire ifu2itcm_cmd_ready; // Handshake ready
-  wire [`ITCM_ADDR_WIDTH-1:0]   ifu2itcm_addr; //transcation to itcm start address
+  wire [`ITCM_ADDR_WIDTH-1:0]   ifu2itcm_cmd_addr; //transcation to itcm start address
   
   wire ifu2itcm_rsp_valid; // Response valid 
   wire ifu2itcm_rsp_ready; // Response ready
