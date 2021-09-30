@@ -176,20 +176,20 @@ module ifu (
     .ifu_rsp_instr (ifu_rsp_instr),
     .itcm_nohold   (itcm_nohold),
 
-  `ifdef E203_HAS_ITCM //{
+
+  
     .itcm_region_indic (itcm_region_indic),
     
     .ifu2itcm_cmd_valid(ifu2itcm_cmd_valid),
     .ifu2itcm_cmd_ready(ifu2itcm_cmd_ready),
     
-    .ifu2itcm_cmd_addr (ifu2itcm_cmd_addr ),
+    //.ifu2itcm_cmd_addr (ifu2itcm_cmd_addr ),
     
     .ifu2itcm_rsp_valid(ifu2itcm_rsp_valid),
     .ifu2itcm_rsp_ready(ifu2itcm_rsp_ready),
     //.ifu2itcm_icb_rsp_err  (ifu2itcm_icb_rsp_err  ),
     .ifu2itcm_icb_rsp_rdata(ifu2itcm_rsp_rdata),
-  `endif//}
-
+  
   /*
   `ifdef E203_HAS_MEM_ITF //{
     .ifu2biu_icb_cmd_valid(ifu2biu_icb_cmd_valid),
@@ -203,17 +203,16 @@ module ifu (
   `endif//}
   */
 
-  `ifdef E203_HAS_ITCM //{
     .ifu2itcm_holdup (ifu2itcm_holdup),
     //.ifu2itcm_replay (ifu2itcm_replay),
-  `endif//}
+  
 
     .clk           (clk          ),
     .rst_n         (rst_n        ) 
   );
 
   assign ifu_active = 1'b1;// Seems the IFU never rest at block level
-    
+  assign ifu2itcm_cmd_addr =  inspect_pc;
 );
     
 endmodule
