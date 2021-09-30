@@ -6,7 +6,6 @@
 `include "defines.v"
 
 module srams (
-    input clk,
     //ITCM ram
     input itcm_ram_we,
     input [`ITCM_RAM_AW-1:0] itcm_ram_addr,
@@ -19,6 +18,7 @@ module srams (
     input [`ITCM_RAM_DW-1:0] dtcm_ram_din,
     input [`ITCM_RAM_MW-1:0] dtcm_ram_wem,
     output [`ITCM_RAM_DW-1:0] dtcm_ram_dout,
+    input clk
 );
 
 itcm_ram u_itcm_ram (
