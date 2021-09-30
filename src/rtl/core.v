@@ -7,7 +7,7 @@
 
 module core (
     output [`PC_SIZE-1:0] inspect_pc,
-    
+    input [`PC_SIZE-1:0] pc_rtvec,
     //ifu to itcm interface
     output ifu2itcm_cmd_valid,
     input ifu2itcm_cmd_ready,
@@ -42,7 +42,7 @@ ifu u_ifu (
     .inspect_pc(inspect_pc),
     .ifu_active(),
     .itcm_nohold(),
-    .pc_rtvec(),
+    .pc_rtvec(pc_rtvec),
     .ifu_o_ir(ifu_o_ir),
     .ifu_o_pc(ifu_o_pc),
     .ifu_o_rs1idx(ifu_o_rs1idx),
@@ -54,6 +54,15 @@ ifu u_ifu (
     .pipe_flush_req(),
     .pipe_flush_add_op1(),
     .pipe_flush_add_op2(),
+    .itcm_region_indic(),
+
+    .ifu2itcm_cmd_valid(ifu2itcm_cmd_valid),
+    .ifu2itcm_cmd_ready(ifu2itcm_cmd_ready),
+    .ifu2itcm_cmd_addr(ifu2itcm_cmd_addr),
+    .ifu2itcm_rsp_valid(ifu2itcm_rsp_valid),
+    .ifu2itcm_rsp_ready(ifu2itcm_cmd_ready),
+    .ifu2itcm_rsp_rdata(ifu2itcm_rsp_rdata),
+
     .ifu_halt_req(),
     .ifu_halt_ack(),
     .oitf_empty(),
