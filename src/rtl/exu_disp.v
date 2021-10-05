@@ -12,8 +12,8 @@ module exu_disp (
     output disp_i_ready,     //handshake ready to ifu
     
     // signals from decode module
-    input disp_i_rs1x0,
-    input disp_i_rs2x0,
+    //input disp_i_rs1x0,
+    //input disp_i_rs2x0,
     input disp_i_rs1en,
     input disp_i_rs2en,
     input disp_i_rdwen,
@@ -50,7 +50,7 @@ module exu_disp (
     input [`ITAG_WIDTH-1:0] disp_oitf_ptr, 
 
     output disp_oitf_ena,
-    output disp_oitf_ready,
+    input disp_oitf_ready,
     
     output  disp_oitf_rs1en,
     output disp_oitf_rs2en,
@@ -59,8 +59,6 @@ module exu_disp (
     output [`RFIDX_WIDTH-1:0] disp_oitf_rs1idx,
     output [`RFIDX_WIDTH-1:0] disp_oitf_rs2idx,
     output [`RFIDX_WIDTH-1:0] disp_oitf_rdidx,
-
-    output [`PC_SIZE-1:0] disp_oitf_pc
 );
 
 //wire [`DECINFO_GRP_WIDTH-1:0] disp_i_info_grp = disp_i_info[`DECOINFO_GRP];
@@ -104,5 +102,4 @@ assign disp_oitf_rdwen = disp_i_rdwen
 assign disp_oitf_rs1idx = disp_i_rs1idx;
 assign disp_oitf_rs2idx = disp_i_rs2idx;
 assign disp_oitf_rdidx = disp_i_rdidx;
-assign disp_oitf_pc = disp_i_pc;
 endmodule

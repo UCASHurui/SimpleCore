@@ -1,18 +1,47 @@
-module cpu (
-    output [`PC_SIZE-1:0] inspect_pc,
+module exu (
+    input i_valid,
+    output i_ready,
+    input [`INSTR_SIZE-1:0] i_ir,
+    input [`PC_SIZE-1:0] i_pc,
+    input i_pc_vld,
+    input i_prdt_taken, 
 
-    output itcm_ram_we,
-    output [`ITCM_RAM_AW-1:0] itcm_ram_addr,
-    output [`ITCM_RAM_DW-1:0] itcm_ram_din,
-    output [`ITCM_RAM_MW-1:0] itcm_ram_wem,
-    input [`ITCM_RAM_DW-1:0] itcm_ram_dout,
+    input [`RFIDX_WIDTH-1:0] i_rs1idx,
+    input [`RFIDX_WIDTH-1:0] i_rs2idx,
 
-    output dtcm_ram_we,
-    output [`DTCM_RAM_AW-1:0] dtcm_ram_addr,
-    output [`DTCM_RAM_DW-1:0] dtcm_ram_din,
-    output [`DTCM_RAM_MW-1:0] dtcm_ram_wem,
-    input [`DTCM_RAM_DW-1:0] dtcm_ram_dout,
+    input pipe_flush_ack,
+    output pip_flush_req,
+    output [`PC_SIZE-1:0] pipe_flush_add_op1,
+    output [`PC_SIZE-1:0] pipe_flush_add_op2,
+
+    input lsu_o_valid,
+    output lsu_o_ready,
+    input [`XLEN-1:0] lsu_o_wbck_data,
+    input [`ITAG-1:0] lsu_o_wbck_itag,
     
-    input clk,//for simulation purpose, from testbench
-    input rst_n//for simulation purpose, from testbench
+    output oitf_empty,
+    output [`XLEN-1:0] rf2ifu_x1,
+    output [`XLEN-1:0] rf2ifurs1,
+    output dec2ifu_rden,
+    output dec2ifu_rs1en,
+    output [`RFIDX_WIDTH-1:0] dec2ifu_rdidx,
+
+    output dec2_ifu_div,
+    output dec2_ifu_rem,
+    output dec2_ifu_divu,
+    output dec2_ifu_remu,
+
+    output agu_cmd_valid,
+    input agu_cmd_ready,
+    output [`DTCM_RAM_AW-1:0] agu_cmd_addr,
+    output agu_cmd_read,
+    output [`XLEN-1:0] agu_cmd_wdata,
+    output [`XLEN/8-1:0] agu_cmd_wmask,
+    
+    input agu_rsp_valid,
+    output agu_rsp_ready,
+    input [`XLEN-1:0] agu_rsp_rdata,
+
+    input clk,
+    input rst_n
 );

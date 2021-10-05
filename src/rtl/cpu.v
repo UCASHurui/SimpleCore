@@ -7,7 +7,7 @@
 
 module cpu (
     output [`PC_SIZE-1:0] inspect_pc,
-
+    input [`PC_SIZE-1:0] pc_rtvec,
     //SRAM interface
     //ITCM SRAM
     output itcm_ram_we,
@@ -38,6 +38,7 @@ wire [`ITCM_RAM_DW-1:0] ifu2itcm_rsp_rdata;
 //instantiate core
 core u_core (
     .inspect_pc(inspect_pc),
+    .pc_rtvec(pc_rtvec)
     .ifu2itcm_cmd_valid(ifu2itcm_cmd_valid),
     .ifu2itcm_cmd_ready(ifu2itcm_cmd_ready),
     .ifu2itcm_cmd_addr(ifu2itcm_cmd_addr),

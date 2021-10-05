@@ -37,12 +37,7 @@ module ifu_ifetch(
   input  ifu_rsp_err,   // Response error
   // Note: the RSP channel always return a valid instruction fetched from the fetching start PC address.
   // The targetd (ITCM, ICache or Sys-MEM) ctrl module will handle the unalign cases and split-and-merge works
-  
-  //input  ifu_rsp_replay,
   input  [`INSTR_SIZE-1:0] ifu_rsp_instr, // Response instruction
-
-
-
   // The Instruction Register stage to EXU interface
   output [`INSTR_SIZE-1:0] ifu_o_ir,// The instruction register
   output [`PC_SIZE-1:0] ifu_o_pc,   // The PC register along with
@@ -60,18 +55,6 @@ module ifu_ifetch(
   input   pipe_flush_req, // pipeline flush request
   input   [`PC_SIZE-1:0] pipe_flush_add_op1,  
   input   [`PC_SIZE-1:0] pipe_flush_add_op2,
-  //`ifdef E203_TIMING_BOOST//}
-  input   [`PC_SIZE-1:0] pipe_flush_pc,  
-  //`endif//}
-
-      
-  // The halt request come from other commit stage
-  // If the ifu_halt_req is asserting, then IFU will stop fetching new instructions and after the oustanding transactions are completed, asserting the ifu_halt_ack as the response.
-  // The IFU will resume fetching only after the ifu_halt_req is de-asserted
-  input  ifu_halt_req,
-  output ifu_halt_ack,
-
-
   input  oitf_empty,
   input  [`XLEN-1:0] rf2ifu_x1,
   input  [`XLEN-1:0] rf2ifu_rs1,
@@ -123,29 +106,30 @@ module ifu_ifetch(
 
  
   // The halt ack generation
+  /*
   wire halt_ack_set;
   wire halt_ack_clr;
   wire halt_ack_ena;
   wire halt_ack_r;
   wire halt_ack_nxt;
-
+*/
      // The halt_ack will be set when
      // 1. Currently halt_req is asserting
      // 2. Currently halt_ack is not asserting
      // 3. Currently the ifetch REQ channel is ready, means there is no oustanding transactions
   wire ifu_no_outs;
-  assign halt_ack_set = ifu_halt_req & (~halt_ack_r) & ifu_no_outs;
+  //assign halt_ack_set = ifu_halt_req & (~halt_ack_r) & ifu_no_outs;
      // The halt_ack_r valid is cleared when 
      //    * Currently halt_ack is asserting
      //    * Currently halt_req is de-asserting
-  assign halt_ack_clr = halt_ack_r & (~ifu_halt_req);
+  //assign halt_ack_clr = halt_ack_r & (~ifu_halt_req);
 
-  assign halt_ack_ena = halt_ack_set | halt_ack_clr;
-  assign halt_ack_nxt = halt_ack_set | (~halt_ack_clr);
+  //assign halt_ack_ena = halt_ack_set | halt_ack_clr;
+  //assign halt_ack_nxt = halt_ack_set | (~halt_ack_clr);
 
-  gnrl_dfflr #(1) halt_ack_dfflr (halt_ack_ena, halt_ack_nxt, halt_ack_r, clk, rst_n);
+  //gnrl_dfflr #(1) halt_ack_dfflr (halt_ack_ena, halt_ack_nxt, halt_ack_r, clk, rst_n);
 
-  assign ifu_halt_ack = halt_ack_r;
+  //assign ifu_halt_ack = halt_ack_r;
 
 
    // The flush ack signal generation
@@ -243,32 +227,6 @@ module ifu_ifetch(
   wire minidec_rs2en;
   wire [`RFIDX_WIDTH-1:0] minidec_rs1idx;
   wire [`RFIDX_WIDTH-1:0] minidec_rs2idx;
-  
-  // SimpleCore does not support float number processing hence no Float Processing Unit (FPU)
-  /*
-  `ifndef HAS_FPU//}  //Float Processing Unit
-  wire minidec_fpu        = 1'b0;
-  wire minidec_fpu_rs1en  = 1'b0;
-  wire minidec_fpu_rs2en  = 1'b0;
-  wire minidec_fpu_rs3en  = 1'b0;
-  wire minidec_fpu_rs1fpu = 1'b0;
-  wire minidec_fpu_rs2fpu = 1'b0;
-  wire minidec_fpu_rs3fpu = 1'b0;
-  wire [`E203_RFIDX_WIDTH-1:0] minidec_fpu_rs1idx = `RFIDX_WIDTH'b0;
-  wire [`E203_RFIDX_WIDTH-1:0] minidec_fpu_rs2idx = `RFIDX_WIDTH'b0;
-  `endif//}
-
-  wire [`E203_RFIDX_WIDTH-1:0] ir_rs1idx_r;
-  wire [`E203_RFIDX_WIDTH-1:0] ir_rs2idx_r;
-  wire bpu2rf_rs1_ena;
-  //FPU: if it is FPU instruction. we still need to put it into the IR register, but we need to mask off the non-integer regfile index to save power
-  wire ir_rs1idx_ena = (minidec_fpu & ir_valid_set & minidec_fpu_rs1en & (~minidec_fpu_rs1fpu)) | ((~minidec_fpu) & ir_valid_set & minidec_rs1en) | bpu2rf_rs1_ena;
-  wire ir_rs2idx_ena = (minidec_fpu & ir_valid_set & minidec_fpu_rs2en & (~minidec_fpu_rs2fpu)) | ((~minidec_fpu) & ir_valid_set & minidec_rs2en);
-  wire [`RFIDX_WIDTH-1:0] ir_rs1idx_nxt = minidec_fpu ? minidec_fpu_rs1idx : minidec_rs1idx;
-  wire [`RFIDX_WIDTH-1:0] ir_rs2idx_nxt = minidec_fpu ? minidec_fpu_rs2idx : minidec_rs2idx;
-  gnrl_dfflr #(`RFIDX_WIDTH) ir_rs1idx_dfflr (ir_rs1idx_ena, ir_rs1idx_nxt, ir_rs1idx_r, clk, rst_n);
-  gnrl_dfflr #(`RFIDX_WIDTH) ir_rs2idx_dfflr (ir_rs2idx_ena, ir_rs2idx_nxt, ir_rs2idx_r, clk, rst_n);
-  */
 
   wire [`PC_SIZE-1:0] pc_r;
   wire [`PC_SIZE-1:0] ifu_pc_nxt = pc_r; // generate next oc
@@ -277,9 +235,7 @@ module ifu_ifetch(
 
   assign ifu_o_ir  = ifu_ir_r;
   assign ifu_o_pc  = ifu_pc_r;
-  // Instruction fetch misaligned exceptions are not possible on machines that support extensions with 16-bit aligned instructions, such as the compressed instruction set extension, C.
-  //assign ifu_o_misalgn = 1'b0;// Never happen in RV32C configuration 
-  //assign ifu_o_buserr  = ifu_err_r;
+
   assign ifu_o_rs1idx = ir_rs1idx_r;
   assign ifu_o_rs2idx = ir_rs2idx_r;
   assign ifu_o_prdt_taken = ifu_prdt_taken_r;
@@ -335,8 +291,6 @@ module ifu_ifetch(
       ;
    */
 
-
-
   // Next PC generation
   wire minidec_bjp;
   wire minidec_jal;
@@ -366,11 +320,8 @@ module ifu_ifetch(
       //.dec_divu    (minidec_divu),
       //.dec_remu    (minidec_remu),
 
-
-
       .dec_jalr_rs1idx (minidec_jalr_rs1idx),
       .dec_bjp_imm (minidec_bjp_imm    )
-
   );
 
   wire bpu_wait;
@@ -378,9 +329,8 @@ module ifu_ifetch(
   wire [`PC_SIZE-1:0] prdt_pc_add_op2;
 
   ifu_bpu u_ifu_bpu(
-
     .pc                       (pc_r),
-                              
+   
     .dec_jal                  (minidec_jal  ),
     .dec_jalr                 (minidec_jalr ),
     .dec_bxx                  (minidec_bxx  ),
@@ -453,7 +403,7 @@ module ifu_ifetch(
   `ifndef TIMING_BOOST//}
   assign pc_nxt = {pc_nxt_pre[`PC_SIZE-1:1],1'b0};
   `else//}{
-  
+  //to check: there is no pipe_flush_pc
   assign pc_nxt = 
                pipe_flush_req ? {pipe_flush_pc[`PC_SIZE-1:1],1'b0} :
                dly_pipe_flush_req ? {pc_r[`PC_SIZE-1:1],1'b0} :
@@ -465,7 +415,7 @@ module ifu_ifetch(
   //  2. it does not need to wait
   //  3. it is not a replay-set cycle
   //  4. there is no halt_request
-  wire ifu_new_req = (~bpu_wait) & (~ifu_halt_req) & (~reset_flag_r) & (~ifu_rsp_need_replay);
+  wire ifu_new_req = (~bpu_wait) & (~reset_flag_r) & (~ifu_rsp_need_replay);
 
 
   // The fetch request valid is triggering when

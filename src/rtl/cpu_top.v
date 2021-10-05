@@ -6,6 +6,7 @@
 `include "defines.v"
 
 module cpu_top (
+    input pc_rtvec,//initial value of pc
     input clk,
     input rst_n
 );
@@ -23,6 +24,7 @@ wire [`DTCM_RAM_DW-1:0] dtcm_ram_dout;
 //instantiate cpu
 cpu u_cpu (
     .inspect_pc(),
+    .pc_rtvec(pc_rtvec)
     .itcm_ram_we(itcm_ram_we),
     .itcm_ram_addr(itcm_ram_addr),
     .itcm_ram_din(itcm_ram_din),

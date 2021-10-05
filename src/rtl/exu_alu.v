@@ -27,13 +27,12 @@ module exu_alu(
   input  [`XLEN-1:0] i_imm,
   input  [`DECINFO_WIDTH-1:0]  i_info,  
   input  [`PC_SIZE-1:0] i_pc,
-  input  [`INSTR_SIZE-1:0] i_instr,
+  //input  [`INSTR_SIZE-1:0] i_instr,
   input  i_pc_vld,
   input  [`RFIDX_WIDTH-1:0] i_rdidx,
   input  i_rdwen,
   input  i_ilegl,
 
-  input  flush_req,
 
 
   //////////////////////////////////////////////////////////////
@@ -43,7 +42,7 @@ module exu_alu(
   input  cmt_o_ready,                               // Handshake ready
   output cmt_o_pc_vld,  
   output [`PC_SIZE-1:0] cmt_o_pc,  
-  output [`INSTR_SIZE-1:0] cmt_o_instr,  
+  //output [`INSTR_SIZE-1:0] cmt_o_instr,  
   output [`XLEN-1:0]    cmt_o_imm,                 // The resolved ture/false
     //   The Branch and Jump Commit
   output cmt_o_rv32,                               // The predicted ture/false  
@@ -73,6 +72,7 @@ module exu_alu(
   output [`ADDR_SIZE-1:0]        agu_cmd_addr,           // Bus transaction start addr 
   output                         agu_cmd_read,      // Read or write
   output [`XLEN-1:0]             agu_cmd_wdata, 
+  output [`XLEN/8-1:0] agu_cmd_wmask,
   output [1:0]                   agu_cmd_size,
   output                         agu_cmd_back2agu, 
   output [`ITAG_WIDTH -1:0]       agu_cmd_itag,
@@ -259,7 +259,7 @@ module exu_alu(
       .agu_cmd_addr    (agu_cmd_addr    ),
       .agu_cmd_read    (agu_cmd_read    ),
       .agu_cmd_wdata   (agu_cmd_wdata   ),
-
+      .agu_cmd_wmask (agu_cmd_wmask),
       .agu_cmd_size    (agu_cmd_size    ),
       .agu_cmd_back2agu(agu_cmd_back2agu),
       .agu_cmd_usign   (agu_cmd_usign   ),

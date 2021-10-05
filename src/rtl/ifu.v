@@ -1,17 +1,17 @@
 /*
   Basic functions and interface of IFU module
-  1. IFU的PC生成单元产生下一条指令的PC。
+  1. IFU的PC生成单元产生下一条指令的PC�?
      The PC generator generates the Program Counter(PC) of next instruction
-  2. 该PC传输到地址判断和ICB生成单元，就是根据PC值产生相应读指请求，可能的指令目的是ITCM或者外部存储，外部存储通过BIU访问。
+  2. �?PC传输到地址判断和ICB生成单元，就�?根据PC值产生相应�?�指请求，可能的指令�?的是ITCM或者�?�部存储，�?�部存储通过BIU访问�?
      Such PC is then transmitted to address discriminator and ICB generator, loading instruction request is generated according to PC, possible destination are ITCM or external memory.
      external memory is read through BIU. 
-  3. 该PC值也会传输到和EXU单元接口的PC寄存器中。
+  3. �?PC值也会传输到和EXU单元接口的PC寄存器中�?
      Such is PC is also transmitted to PC register interfaced with EXU unit. 
-  4. 取回的指令会放置到和EXU接口的IR(Instruction register)寄存器中。EXU单元会根据指令和其对应的PC值进行后续的操作。
-  5. 因为每个周期都要产生下一条指令的PC，所以取回的指令也会传入Mini-Decode单元，进行简单的译码操作，判别当前指令是普通指令还是分支跳转指令。
-     如果判别为分支跳转指令，则在同一周期进行分支预测。
-     最后，根据译码的信息和分支预测的信息生成下一条指令的PC。
-  6. 来自commit模块的冲刷管线请求会复位PC值。
+  4. 取回的指令会放置到和EXU接口的IR(Instruction register)寄存器中。EXU单元会根�?指令和其对应的PC值进行后�?的操作�?
+  5. 因为每个周期都�?�产生下一条指令的PC，所以取回的指令也会传入Mini-Decode单元，进行简单的译码操作，判�?当前指令�?�?通指令还�?分支跳转指令�?
+     如果判别为分�?跳转指令，则在同一周期进�?�分�?预测�?
+     最后，根据译码的信�?和分�?预测的信�?生成下一条指令的PC�?
+  6. 来自commit模块的冲刷�?�线请求会�?�位PC值�?
 */
 
 
@@ -35,9 +35,6 @@ module ifu (
   // The IR stage to EXU interface
   output [`INSTR_SIZE-1:0] ifu_o_ir,// The instruction register
   output [`PC_SIZE-1:0] ifu_o_pc,   // The PC register along with
-  //output ifu_o_pc_vld,
-  //output ifu_o_misalgn,                  // The fetch misalign 
-  //output ifu_o_buserr,                   // The fetch bus error
   output [`RFIDX_WIDTH-1:0] ifu_o_rs1idx,
   output [`RFIDX_WIDTH-1:0] ifu_o_rs2idx,
   output ifu_o_prdt_taken,               // The Bxx is predicted as taken
@@ -49,11 +46,6 @@ module ifu (
   input   pipe_flush_req,
   input   [`PC_SIZE-1:0] pipe_flush_add_op1,  
   input   [`PC_SIZE-1:0] pipe_flush_add_op2,
-  /*
-  `ifdef E203_TIMING_BOOST//}
-  input   [`PC_SIZE-1:0] pipe_flush_pc,  
-  `endif//}
-  */
   
   input [`ADDR_SIZE-1:0] itcm_region_indic,
   //ifu to itcm module
@@ -68,15 +60,6 @@ module ifu (
   //input  ifu2itcm_rsp_err,   // Response error 
   // Note: the RSP rdata is inline with AXI definition
   input  [`ITCM_DATA_WIDTH-1:0] ifu2itcm_icb_rsp_rdata, 
-  
-      
-  // The halt request come from other commit stage
-  //   If the ifu_halt_req is asserting, then IFU will stop fetching new 
-  //     instructions and after the oustanding transactions are completed,
-  //     asserting the ifu_halt_ack as the response.
-  //   The IFU will resume fetching only after the ifu_halt_req is deasserted
-  input  ifu_halt_req,
-  output ifu_halt_ack,
 
   input  oitf_empty,
   //Regfile to ifu interface
@@ -94,7 +77,7 @@ module ifu (
 
   input  clk,
   input  rst_n
-  );
+);
 
   
   wire ifu_req_valid; 
@@ -116,18 +99,14 @@ module ifu (
     .ifu_req_ready (ifu_req_ready),
     .ifu_req_pc    (ifu_req_pc   ),
     .ifu_req_seq     (ifu_req_seq     ),
-    //.ifu_req_seq_rv32(ifu_req_seq_rv32),
     .ifu_req_last_pc (ifu_req_last_pc ),
     .ifu_rsp_valid (ifu_rsp_valid),
     .ifu_rsp_ready (ifu_rsp_ready),
     .ifu_rsp_err   (ifu_rsp_err  ),
-    //.ifu_rsp_replay(ifu_rsp_replay),
     .ifu_rsp_instr (ifu_rsp_instr),
     .ifu_o_ir      (ifu_o_ir     ),
     .ifu_o_pc      (ifu_o_pc     ),
     .ifu_o_pc_vld  (ifu_o_pc_vld ),
-    //.ifu_o_misalgn (ifu_o_misalgn),
-    //.ifu_o_buserr  (ifu_o_buserr ),
     .ifu_o_rs1idx  (ifu_o_rs1idx),
     .ifu_o_rs2idx  (ifu_o_rs2idx),
     .ifu_o_prdt_taken(ifu_o_prdt_taken),
@@ -137,12 +116,7 @@ module ifu (
     .pipe_flush_ack     (pipe_flush_ack    ), 
     .pipe_flush_req     (pipe_flush_req    ),
     .pipe_flush_add_op1 (pipe_flush_add_op1),     
-  //`ifdef E203_TIMING_BOOST//}
-    //.pipe_flush_pc      (pipe_flush_pc),  
-  //`endif//}
     .pipe_flush_add_op2 (pipe_flush_add_op2), 
-    .ifu_halt_req  (ifu_halt_req ),
-    .ifu_halt_ack  (ifu_halt_ack ),
 
     .oitf_empty    (oitf_empty   ),
     .rf2ifu_x1     (rf2ifu_x1    ),
@@ -167,12 +141,10 @@ module ifu (
     .ifu_req_ready (ifu_req_ready),
     .ifu_req_pc    (ifu_req_pc   ),
     .ifu_req_seq     (ifu_req_seq     ),
-    //.ifu_req_seq_rv32(ifu_req_seq_rv32),
     .ifu_req_last_pc (ifu_req_last_pc ),
     .ifu_rsp_valid (ifu_rsp_valid),
     .ifu_rsp_ready (ifu_rsp_ready),
     .ifu_rsp_err   (ifu_rsp_err  ),
-    //.ifu_rsp_replay(ifu_rsp_replay),
     .ifu_rsp_instr (ifu_rsp_instr),
     .itcm_nohold   (itcm_nohold),
 
@@ -189,30 +161,13 @@ module ifu (
     .ifu2itcm_rsp_ready(ifu2itcm_rsp_ready),
     //.ifu2itcm_icb_rsp_err  (ifu2itcm_icb_rsp_err  ),
     .ifu2itcm_icb_rsp_rdata(ifu2itcm_rsp_rdata),
-  
-  /*
-  `ifdef E203_HAS_MEM_ITF //{
-    .ifu2biu_icb_cmd_valid(ifu2biu_icb_cmd_valid),
-    .ifu2biu_icb_cmd_ready(ifu2biu_icb_cmd_ready),
-    .ifu2biu_icb_cmd_addr (ifu2biu_icb_cmd_addr ),
-    .ifu2biu_icb_rsp_valid(ifu2biu_icb_rsp_valid),
-    .ifu2biu_icb_rsp_ready(ifu2biu_icb_rsp_ready),
-    .ifu2biu_icb_rsp_err  (ifu2biu_icb_rsp_err  ),
-    .ifu2biu_icb_rsp_rdata(ifu2biu_icb_rsp_rdata),
-    //.ifu2biu_replay (ifu2biu_replay),
-  `endif//}
-  */
 
     .ifu2itcm_holdup (ifu2itcm_holdup),
-    //.ifu2itcm_replay (ifu2itcm_replay),
-  
-
     .clk           (clk          ),
     .rst_n         (rst_n        ) 
   );
 
   assign ifu_active = 1'b1;// Seems the IFU never rest at block level
   assign ifu2itcm_cmd_addr =  inspect_pc;
-);
     
 endmodule
