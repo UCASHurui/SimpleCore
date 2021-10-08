@@ -45,16 +45,16 @@ module exu_alu_bjp(
   output bjp_req_alu_cmp_eq ,   
   output bjp_req_alu_cmp_ne ,  
   output bjp_req_alu_cmp_lt ,   
-  output bjp_req_alu_cmp_gt ,    
+  output bjp_req_alu_cmp_ge ,    
   output bjp_req_alu_cmp_ltu,
-  output bjp_req_alu_cmp_gtu,
+  output bjp_req_alu_cmp_geu,
   output bjp_req_alu_add,
 
   input  bjp_req_alu_cmp_res,
   input  [`XLEN-1:0] bjp_req_alu_add_res,
 
   input  clk,
-  input  rst_n,
+  input  rst_n
   );
 
   wire bxx   = bjp_i_info [`DECINFO_BJP_BXX ];    //
@@ -71,9 +71,9 @@ module exu_alu_bjp(
   assign bjp_req_alu_cmp_eq  = bjp_i_info [`DECINFO_BJP_BEQ  ];  //4
   assign bjp_req_alu_cmp_ne  = bjp_i_info [`DECINFO_BJP_BNE  ];  //5
   assign bjp_req_alu_cmp_lt  = bjp_i_info [`DECINFO_BJP_BLT  ];  //6
-  assign bjp_req_alu_cmp_gt  = bjp_i_info [`DECINFO_BJP_BGT  ];  //7
+  assign bjp_req_alu_cmp_ge  = bjp_i_info [`DECINFO_BJP_BGE  ];  //7
   assign bjp_req_alu_cmp_ltu = bjp_i_info [`DECINFO_BJP_BLTU ];  //8
-  assign bjp_req_alu_cmp_gtu = bjp_i_info [`DECINFO_BJP_BGTU ];  //9
+  assign bjp_req_alu_cmp_geu = bjp_i_info [`DECINFO_BJP_BGEU ];  //9
 
   assign bjp_req_alu_add  = wbck_link;
 

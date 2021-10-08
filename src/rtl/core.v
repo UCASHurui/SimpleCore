@@ -40,11 +40,20 @@ wire [`RFIDX_WIDTH-1:0]ifu_o_rs1idx;
 wire [`RFIDX_WIDTH-1:0]ifu_o_rs2idx;
 wire ifu_o_prdt_taken;
 wire pipe_flush_ack;
+wire oitf_empty;
+wire pipe_flush_req;
+wire ifu_exu_ready;
+wire [`XLEN-1:0] pipe_flush_add_op1;
+wire [`XLEN-1:0] pipe_flush_add_op2;
+wire [`XLEN-1:0] rf2ifu_x1;
+wire [`XLEN-1:0] rf2ifu_rs1;
+wire dec2ifu_rden;
+wire dec2ifu_rs1en;
+wire [`RFIDX_WIDTH-1:0] dec2ifu_rdidx;
+
 assign ifu2itcm_cmd_addr = inspect_pc[`PC_SIZE-1:`PC_SIZE - `ITCM_RAM_AW]; //ifu are only allowed to read itcm through pc addr
 ifu u_ifu (
     .inspect_pc(inspect_pc),
-    .ifu_active(),
-    .itcm_nohold(),
     .pc_rtvec(pc_rtvec),//from input
     .ifu_o_ir(ifu_o_ir),//to exu
     .ifu_o_pc(ifu_o_pc),//to exu
@@ -57,7 +66,6 @@ ifu u_ifu (
     .pipe_flush_req(pipe_flush_req),//from exu
     .pipe_flush_add_op1(pipe_flush_add_op1),//from exu
     .pipe_flush_add_op2(pipe_flush_add_op2),//from exu
-    .itcm_region_indic(),
 
     .ifu2itcm_cmd_valid(ifu2itcm_cmd_valid),//output to itcm_ctrl
     .ifu2itcm_cmd_ready(ifu2itcm_cmd_ready),//input from itcm_ctrl
@@ -79,17 +87,9 @@ ifu u_ifu (
 );
 
 //instantiate exu
-wire pipe_flush_req;
-wire ifu_exu_ready;
-wire [`XLEN-1:0] pipe_flush_add_op1;
-wire [`XLEN-1:0] pipe_flush_add_op2;
+
 wire lsu_o_ready;
-wire oitf_empty;
-wire [`XLEN-1:0] rf2ifu_x1;
-wire [`XLEN-1:0] rf2ifu_rs1;
-wire dec2ifu_rden;
-wire dec2ifu_rs1en;
-wire [`RFIDX_WIDTH-1:0] dec2ifu_rdidx;
+
 wire agu_cmd_valid;
 wire [`DTCM_RAM_AW-1:0] agu_cmd_addr;
 wire agu_cmd_read;
@@ -97,12 +97,17 @@ wire [`ITAG_WIDTH-1:0] agu_cmd_itag;
 wire [`XLEN-1:0] agu_cmd_wdata;
 wire [`XLEN/8-1:0] agu_cmd_wmask;
 wire agu_rsp_ready;
+wire lsu_o_valid;
+wire [`XLEN-1:0] lsu_o_wbck_data;
+wire [`ITAG_WIDTH-1:0] lsu_o_wbck_itag;
+wire agu_cmd_ready;
+wire agu_rsp_valid;
 
 exu u_exu (
     .i_valid(ifu_exu_valid),//from ifu
     .i_ready(ifu_exu_ready),//to ifu
     .i_ir(ifu_o_ir),//from ifu
-    .i_pc(i_pc),//from ifu
+    .i_pc(inspect_pc),//from ifu
     .i_prdt_taken(ifu_o_prdt_taken),//from ifu
     .i_rs1idx(ifu_o_rs1idx),//from ifu
     .i_rs2idx(ifu_o_rs2idx),//from ifu
@@ -142,11 +147,7 @@ exu u_exu (
 );
 
 //instantiate lsu
-wire lsu_o_valid;
-wire [`XLEN-1:0] lsu_o_wbck_data;
-wire [`ITAG_WIDTH-1:0] lsu_o_wbck_itag;
-wire agu_cmd_ready;
-wire agu_rsp_valid;
+
 
 
 lsu u_lsu (

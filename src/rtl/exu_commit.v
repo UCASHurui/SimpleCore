@@ -21,7 +21,7 @@ module exu_commit (
     input pipe_flush_ack,
     output pipe_flush_req,
     output [`PC_SIZE-1:0] pipe_flush_add_op1,
-    output [`PC_SIZE-1:0] pipe_flush_add_op2,
+    output [`PC_SIZE-1:0] pipe_flush_add_op2
 );
 
     wire alu_brchmis_flush_ack = pipe_flush_ack;

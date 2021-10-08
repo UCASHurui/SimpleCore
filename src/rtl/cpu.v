@@ -29,8 +29,8 @@ wire ifu2itcm_cmd_valid;
 wire ifu2itcm_cmd_ready;
 wire [`ITCM_RAM_AW-1:0] ifu2itcm_cmd_addr;
 wire ifu2itcm_cmd_read = 1'b1;//ifu not allowed to write itcm
-wire [`ITCM_RAM_DW-1:0] ifu2itcm_cmd_wdata = `ITCM_RAM_DW{1'b0}; //ifu not allowed to write itcm
-wire [`ITCM_RAM_MW-1:0] ifu2itcm_cmd_wmask = `ITCM_RAM_MW{1'b0}; //ifu not allowed to write itcm
+wire [`ITCM_RAM_DW-1:0] ifu2itcm_cmd_wdata = {`ITCM_RAM_DW{1'b0}}; //ifu not allowed to write itcm
+wire [`ITCM_RAM_MW-1:0] ifu2itcm_cmd_wmask = {`ITCM_RAM_MW{1'b0}}; //ifu not allowed to write itcm
 wire ifu2itcm_rsp_valid;
 wire ifu2itcm_rsp_ready;
 wire [`ITCM_RAM_DW-1:0] ifu2itcm_rsp_rdata;
@@ -38,7 +38,7 @@ wire [`ITCM_RAM_DW-1:0] ifu2itcm_rsp_rdata;
 //instantiate core
 core u_core (
     .inspect_pc(inspect_pc),
-    .pc_rtvec(pc_rtvec)
+    .pc_rtvec(pc_rtvec),
     .ifu2itcm_cmd_valid(ifu2itcm_cmd_valid),
     .ifu2itcm_cmd_ready(ifu2itcm_cmd_ready),
     .ifu2itcm_cmd_addr(ifu2itcm_cmd_addr),
@@ -60,7 +60,6 @@ core u_core (
 
 //instantiate itcm_ctrl
 itcm_ctrl u_itcm_ctrl (
-    .itcm_active(),
     .ifu2itcm_cmd_valid(ifu2itcm_cmd_valid),
     .ifu2itcm_cmd_ready(ifu2itcm_cmd_ready),
     .ifu2itcm_cmd_read(ifu2itcm_cmd_read),

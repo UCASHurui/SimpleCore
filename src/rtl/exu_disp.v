@@ -36,7 +36,7 @@ module exu_disp (
     output [`XLEN-1:0] disp_o_alu_rs1,
     output [`XLEN-1:0] disp_o_alu_rs2,
     output disp_o_alu_rdwen,
-    output [`RFIDX-1:0] disp_o_alu_rdidx,
+    output [`RFIDX_WIDTH-1:0] disp_o_alu_rdidx,
     output [`DECINFO_WIDTH-1:0] disp_o_alu_info,
     output [`XLEN-1:0] disp_o_alu_imm,
     output [`PC_SIZE-1:0] disp_o_alu_pc,
@@ -58,7 +58,7 @@ module exu_disp (
 
     output [`RFIDX_WIDTH-1:0] disp_oitf_rs1idx,
     output [`RFIDX_WIDTH-1:0] disp_oitf_rs2idx,
-    output [`RFIDX_WIDTH-1:0] disp_oitf_rdidx,
+    output [`RFIDX_WIDTH-1:0] disp_oitf_rdidx
 );
 
 //wire [`DECINFO_GRP_WIDTH-1:0] disp_i_info_grp = disp_i_info[`DECOINFO_GRP];
@@ -73,7 +73,7 @@ wire waw_dep = oitfrd_match_disprd;
 wire dep = raw_dep | waw_dep;
 
 wire disp_condition = (~dep)
-                                    & (disp_alu_longp?disp_oitf_ready: 1'b1); // different from e203, we use disp_alu_longp here instead of disp_alu_longp_prdt;assume both mul/div and LSU need oitf ready
+                                    & (disp_o_alu_longpipe ? disp_oitf_ready: 1'b1); // different from e203, we use disp_o_alu_longpipe here instead of disp_alu_longp_prdt;assume both mul/div and LSU need oitf ready
                                     //maybe critical path here
 //handshake
 wire disp_i_valid_pos = disp_condition & disp_i_valid;
@@ -88,17 +88,17 @@ assign disp_o_alu_rdwen = disp_i_rdwen;
 assign disp_o_alu_rdidx = disp_i_rdidx;
 assign disp_o_alu_info = disp_i_info;
 
-assign disp_oitf_ena = disp_o_alu_valid & disp_o_alu_ready & disp_alu_longp;
+assign disp_oitf_ena = disp_o_alu_valid & disp_o_alu_ready & disp_o_alu_longpipe;
 
 assign disp_o_alu_imm = disp_i_imm;
 assign disp_o_alu_pc = disp_i_pc;
 assign disp_o_alu_itag = disp_oitf_ptr;//from oitf
-assign disp_o_alu_ilegl = disp_i_ilegl;
+assign disp_o_alu_ilegl = disp_ilegl;
 
 //dispatch to oitf
 assign disp_oitf_rs1en = disp_i_rs1en;
 assign disp_oitf_rs2en = disp_i_rs2en;
-assign disp_oitf_rdwen = disp_i_rdwen
+assign disp_oitf_rdwen = disp_i_rdwen;
 assign disp_oitf_rs1idx = disp_i_rs1idx;
 assign disp_oitf_rs2idx = disp_i_rs2idx;
 assign disp_oitf_rdidx = disp_i_rdidx;

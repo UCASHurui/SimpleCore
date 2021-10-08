@@ -3,8 +3,6 @@
 //Author : Hurui
 //Modules: lsu_ctrl
 //=================================================
-`include "defines.v"
-
 module gnrl_pipe_stage #(
     //parameter CUT_READY = 0,
     parameter DP = 1,

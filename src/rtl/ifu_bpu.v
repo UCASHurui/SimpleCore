@@ -43,7 +43,7 @@ module ifu_bpu(
 
   input  clk,
   input  rst_n
-  );
+);
 
   /*
   // Static branch prediction logics of BPU
@@ -105,7 +105,7 @@ module ifu_bpu(
   wire rs1xn_rdrf_ena = rs1xn_rdrf_set |   rs1xn_rdrf_clr;
   wire rs1xn_rdrf_nxt = rs1xn_rdrf_set | (~rs1xn_rdrf_clr);
 
-  sirv_gnrl_dfflr #(1) rs1xn_rdrf_dfflrs(rs1xn_rdrf_ena, rs1xn_rdrf_nxt, rs1xn_rdrf_r, clk, rst_n);
+  gnrl_dfflr #(1) rs1xn_rdrf_dfflrs(rs1xn_rdrf_ena, rs1xn_rdrf_nxt, rs1xn_rdrf_r, clk, rst_n);
 
   // generate enable signal of using ReadPort1 in RegFile, the signal loads rs1 index register to read RegFile. (BPU2RegFile_rs1_enable)
   assign bpu2rf_rs1_ena = rs1xn_rdrf_set;

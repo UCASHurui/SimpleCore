@@ -9,7 +9,7 @@
 module exu_longpwbck (
     //LSU write-back interface
     input lsu_wbck_i_valid,
-    output lsu_wback_i_ready,
+    output lsu_wbck_i_ready,
     input [`XLEN-1:0] lsu_wbck_i_data,
     input [`ITAG_WIDTH-1:0] lsu_wbck_i_itag,
 
@@ -22,7 +22,8 @@ module exu_longpwbck (
     input oitf_empty,
     input [`ITAG_WIDTH-1:0] oitf_ret_ptr,
     input oitf_ret_rdwen,
-    output oitf_ret_ena
+    output oitf_ret_ena,
+    input oitf_ret_rdidx
 );
 //longpipe wirte back follow the order of OITF
 //only when the retiring instruction match the toppest itag of OITF

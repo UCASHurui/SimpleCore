@@ -23,10 +23,10 @@
 `define DECINFO_BJP_BEQ `DECINFO_BJP_BPRDT+1                            //4
 `define DECINFO_BJP_BNE `DECINFO_BJP_BEQ+1                              //5
 `define DECINFO_BJP_BLT `DECINFO_BJP_BNE+1                              //6
-`define DECINFO_BJP_BGT `DECINFO_BJP_BLT+1                              //7
-`define DECINFO_BJP_BLTU `DECINFO_BJP_BGT+1                             //8
-`define DECINFO_BJP_BGTU `DECINFO_BJP_BLTU+1                            //9
-`define DECINFO_BJP_BXX `DECINFO_BJP_BGTU+1                             //10
+`define DECINFO_BJP_BGE `DECINFO_BJP_BLT+1                              //7
+`define DECINFO_BJP_BLTU `DECINFO_BJP_BGE+1                             //8
+`define DECINFO_BJP_BGEU `DECINFO_BJP_BLTU+1                            //9
+`define DECINFO_BJP_BXX `DECINFO_BJP_BGEU+1                             //10
 `define DECINFO_BJP_WIDTH `DECINFO_BJP_BXX+1                            //11 bits
 
 `define DECINFO_ALU_ADD `DECINFO_GRP_MSB+1                              //2 

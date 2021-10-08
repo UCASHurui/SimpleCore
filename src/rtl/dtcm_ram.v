@@ -11,7 +11,7 @@ module dtcm_ram (
     input [`DTCM_RAM_AW-1:0] addr,
     input [`DTCM_RAM_DW-1:0] din,
     input [`DTCM_RAM_MW-1:0] wem,
-    output [`DTCM_RAM_DW-1:0] dout,
+    output [`DTCM_RAM_DW-1:0] dout
 );
     sim_ram#(
     .DP(`DTCM_RAM_DP),
@@ -24,7 +24,7 @@ module dtcm_ram (
     .din(din),
     .addr(addr),
     .we(we),
-    .wem(wem)
+    .wem(wem),
     .dout(dout)
 );
 endmodule

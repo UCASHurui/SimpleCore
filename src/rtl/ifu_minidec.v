@@ -39,7 +39,7 @@ module ifu_minidec(
   .i_instr(instr),
   .i_pc(`PC_SIZE'b0),
   .i_prdt_taken(1'b0), 
-  .dec_ilegl(),
+  .dec_illegal(),
 
   .dec_rs1en(dec_rs1en),
   .dec_rs2en(dec_rs2en),

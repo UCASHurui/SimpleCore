@@ -45,13 +45,13 @@ module exu_oitf (
     wire [`RFIDX_WIDTH-1:0] rdidx_r[`OITF_DEPTH-1:0];
     //wire [`PC_SIZE-1:0] pc_r[`OITF_DEPTH-1:0];
     //check full/empty and fifo ptrs(alc ptr & ret ptr)
-    wire alc_ptr_ena = dis_ena;
+    wire alc_ptr_ena = disp_ena;
     wire ret_ptr_ena = ret_ena;
 
     wire oitf_full; //oitf empty is one of the output ports
 
     wire [`ITAG_WIDTH-1:0] alc_ptr_r;
-    wire [`ITAG_WIDTH-1:0] ret_prt_r;
+    wire [`ITAG_WIDTH-1:0] ret_ptr_r;
 
     generate
         if(`OITF_DEPTH > 1) begin: depth_gt1
@@ -64,7 +64,7 @@ module exu_oitf (
             wire ret_ptr_flg_r;
             wire ret_ptr_flg_nxt = ~ret_ptr_flg_r;
             wire ret_ptr_flg_ena = (ret_ptr_r == ($unsigned(`OITF_DEPTH-1))) & ret_ptr_ena;
-            wire [`ITAG_WIDTH-1:0] ret_ptr_nxt = ret_ptr_flg_ena? `ITAG_WDITH'b0:(ret_ptr_r + 1'b1);
+            wire [`ITAG_WIDTH-1:0] ret_ptr_nxt = ret_ptr_flg_ena? `ITAG_WIDTH'b0:(ret_ptr_r + 1'b1);
 
             gnrl_dfflr #(1) alc_ptr_flg_dfflr(alc_ptr_flg_ena, alc_ptr_flg_nxt, alc_ptr_flg_r, clk, rst_n);
             gnrl_dfflr #(`ITAG_WIDTH) alc_ptr_dfflr(alc_ptr_ena, alc_ptr_nxt, alc_ptr_r, clk, rst_n);
@@ -106,8 +106,8 @@ module exu_oitf (
 
 
             assign rd_match_rs1idx[i] = vld_r[i] & rdwen_r[i] & disp_i_rs1en & (rdidx_r[i] == disp_i_rs1idx);
-            assign rd_match_rs2idx[i] = vld_r[i] & rdwen_r[i] & disp_i_rs2en & (rdidx_r[i] == disp_i_rs2idx);;
-            assign rd_match_rdidx[i] = vld_r[i] & rdwen_r[i] & disp_i_rden & (rdidx_r[i] == disp_i_rdidx);;
+            assign rd_match_rs2idx[i] = vld_r[i] & rdwen_r[i] & disp_i_rs2en & (rdidx_r[i] == disp_i_rs2idx);
+            assign rd_match_rdidx[i] = vld_r[i] & rdwen_r[i] & disp_i_rdwen & (rdidx_r[i] == disp_i_rdidx);
         end
     endgenerate
 
@@ -115,7 +115,7 @@ module exu_oitf (
     assign oitfrd_match_disprs2 = |rd_match_rs2idx;
     assign oitfrd_match_disprd = |rd_match_rdidx;
     
-    assign ret_rdidx = rd_idx_r[ret_ptr];
+    assign ret_rdidx = rdidx_r[ret_ptr];
     assign ret_rdwen = rdwen_r[ret_ptr];
     //assign ret_pc = pc_r[ret_ptr];
 endmodule
