@@ -21,7 +21,7 @@ module exu_branchslv (
     output [`PC_SIZE-1:0] brchmis_flush_add_op2
 );
 wire brchmis_need_flush = cmt_i_bjp
-                                            & (cmt_i_bjp_prdt ^ cmt_i_bjp_rslv) // prediction != resolve then flush
+                                            & (cmt_i_bjp_prdt ^ cmt_i_bjp_rslv); // prediction != resolve then flush
 wire brchmis_flush_req = cmt_i_valid & brchmis_need_flush;
 //wire brchmis_flush_hsked = brchmis_flush_req & brchmis_flush_ack;
 

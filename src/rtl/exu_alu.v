@@ -45,7 +45,7 @@ module exu_alu(
   //output [`INSTR_SIZE-1:0] cmt_o_instr,  
   output [`XLEN-1:0]    cmt_o_imm,                 // The resolved ture/false
     //   The Branch and Jump Commit
-  output cmt_o_rv32,                               // The predicted ture/false  
+  //output cmt_o_rv32,                               // The predicted ture/false  
   output cmt_o_bjp,
   output cmt_o_ifu_misalgn,
   output cmt_o_ifu_ilegl,
@@ -68,8 +68,8 @@ module exu_alu(
   // The AGU ICB Interface to LSU-ctrl
   //    * Bus cmd channel
   output                         agu_cmd_valid,     // Handshake valid
-  input                          agu_icmd_ready,    // Handshake ready
-  output [`ADDR_SIZE-1:0]        agu_cmd_addr,           // Bus transaction start addr 
+  input                          agu_cmd_ready,    // Handshake ready
+  output [`DTCM_RAM_AW-1:0]        agu_cmd_addr,           // Bus transaction start addr 
   output                         agu_cmd_read,      // Read or write
   output [`XLEN-1:0]             agu_cmd_wdata, 
   output [`XLEN/8-1:0] agu_cmd_wmask,
@@ -83,7 +83,7 @@ module exu_alu(
 
 
   input  clk,
-  input  rst_n,
+  input  rst_n
   );
 
   //////////////////////////////////////////////////////////////
@@ -148,9 +148,9 @@ module exu_alu(
   wire bjp_req_alu_cmp_eq ;
   wire bjp_req_alu_cmp_ne ;
   wire bjp_req_alu_cmp_lt ;
-  wire bjp_req_alu_cmp_gt ;
+  wire bjp_req_alu_cmp_ge ;
   wire bjp_req_alu_cmp_ltu;
-  wire bjp_req_alu_cmp_gtu;
+  wire bjp_req_alu_cmp_geu;
   wire bjp_req_alu_add;
   wire bjp_req_alu_cmp_res;
   wire [`XLEN-1:0] bjp_req_alu_add_res;
@@ -184,9 +184,9 @@ module exu_alu(
       .bjp_req_alu_cmp_eq  (bjp_req_alu_cmp_eq    ),
       .bjp_req_alu_cmp_ne  (bjp_req_alu_cmp_ne    ),
       .bjp_req_alu_cmp_lt  (bjp_req_alu_cmp_lt    ),
-      .bjp_req_alu_cmp_gt  (bjp_req_alu_cmp_gt    ),
+      .bjp_req_alu_cmp_ge  (bjp_req_alu_cmp_ge    ),
       .bjp_req_alu_cmp_ltu (bjp_req_alu_cmp_ltu   ),
-      .bjp_req_alu_cmp_gtu (bjp_req_alu_cmp_gtu   ),
+      .bjp_req_alu_cmp_geu (bjp_req_alu_cmp_geu   ),
       .bjp_req_alu_add     (bjp_req_alu_add       ),
       .bjp_req_alu_cmp_res (bjp_req_alu_cmp_res   ),
       .bjp_req_alu_add_res (bjp_req_alu_add_res   ),
@@ -246,28 +246,26 @@ module exu_alu(
       .agu_i_longpipe      (agu_i_longpipe  ),
       .agu_i_itag          (agu_i_itag      ),
 
-      .flush_req           (flush_req      ),
+      //.flush_req           (flush_req      ),
 
       .agu_o_valid         (agu_o_valid         ),
       .agu_o_ready         (agu_o_ready         ),
       .agu_o_wbck_wdat     (agu_o_wbck_wdat     ),
-      .agu_o_wbck_err      (agu_o_wbck_err      ),
-
-                                                
+      
       .agu_cmd_valid   (agu_cmd_valid   ),
       .agu_cmd_ready   (agu_cmd_ready   ),
       .agu_cmd_addr    (agu_cmd_addr    ),
       .agu_cmd_read    (agu_cmd_read    ),
       .agu_cmd_wdata   (agu_cmd_wdata   ),
       .agu_cmd_wmask (agu_cmd_wmask),
-      .agu_cmd_size    (agu_cmd_size    ),
-      .agu_cmd_back2agu(agu_cmd_back2agu),
-      .agu_cmd_usign   (agu_cmd_usign   ),
+      //.agu_cmd_size    (agu_cmd_size    ),
+      //.agu_cmd_back2agu(agu_cmd_back2agu),
+      //.agu_cmd_usign   (agu_cmd_usign   ),
       .agu_cmd_itag    (agu_cmd_itag    ),
       .agu_rsp_valid   (agu_rsp_valid   ),
       .agu_rsp_ready   (agu_rsp_ready   ),
-      .agu_rsp_err     (agu_rsp_err     ),
-      .agu_rsp_rdata   (agu_rsp_rdata   ),
+      //.agu_rsp_err     (agu_rsp_err     ),
+      //.agu_rsp_rdata   (agu_rsp_rdata   ),
                                                 
       .agu_req_alu_op1     (agu_req_alu_op1     ),
       .agu_req_alu_op2     (agu_req_alu_op2     ),
@@ -337,7 +335,6 @@ module exu_alu(
       .alu_o_valid         (alu_o_valid         ),
       .alu_o_ready         (alu_o_ready         ),
       .alu_o_wbck_wdat     (alu_o_wbck_wdat     ),
-      .alu_o_wbck_err      (alu_o_wbck_err      ),
    
       .alu_req_alu_add     (alu_req_alu_add       ),
       .alu_req_alu_sub     (alu_req_alu_sub       ),
@@ -357,8 +354,6 @@ module exu_alu(
       .clk                 (clk           ),
       .rst_n               (rst_n         ) 
   );
-
-`
   // Instantiate the MULDIV module
   wire [`XLEN-1:0]           mdv_i_rs1  = {`XLEN         {mdv_op}} & i_rs1;
   wire [`XLEN-1:0]           mdv_i_rs2  = {`XLEN         {mdv_op}} & i_rs2;
@@ -384,7 +379,7 @@ module exu_alu(
   wire          muldiv_sbf_1_ena;
   wire [33-1:0] muldiv_sbf_1_nxt;
   wire [33-1:0] muldiv_sbf_1_r;
-
+/*
   exu_alu_muldiv u_exu_alu_muldiv(
       .mdv_nob2b           (mdv_nob2b),
 
@@ -423,7 +418,7 @@ module exu_alu(
       .clk                 (clk               ),
       .rst_n               (rst_n             ) 
   );
-
+*/
 
 
 
@@ -459,9 +454,9 @@ module exu_alu(
       .bjp_req_alu_cmp_eq  (bjp_req_alu_cmp_eq    ),
       .bjp_req_alu_cmp_ne  (bjp_req_alu_cmp_ne    ),
       .bjp_req_alu_cmp_lt  (bjp_req_alu_cmp_lt    ),
-      .bjp_req_alu_cmp_gt  (bjp_req_alu_cmp_gt    ),
+      .bjp_req_alu_cmp_ge  (bjp_req_alu_cmp_ge    ),
       .bjp_req_alu_cmp_ltu (bjp_req_alu_cmp_ltu   ),
-      .bjp_req_alu_cmp_gtu (bjp_req_alu_cmp_gtu   ),
+      .bjp_req_alu_cmp_geu (bjp_req_alu_cmp_geu   ),
       .bjp_req_alu_add     (bjp_req_alu_add       ),
       .bjp_req_alu_cmp_res (bjp_req_alu_cmp_res   ),
       .bjp_req_alu_add_res (bjp_req_alu_add_res   ),
@@ -584,10 +579,10 @@ module exu_alu(
   assign cmt_o_valid  = o_need_cmt  & o_valid & (o_need_wbck ? wbck_o_ready : 1'b1);
   // 
   //  The commint interface have some special signals
-  assign cmt_o_instr   = i_instr;  
+  //assign cmt_o_instr   = i_instr;  
   assign cmt_o_pc   = i_pc;  
   assign cmt_o_imm  = i_imm;
-  assign cmt_o_rv32 = i_info[`DECINFO_RV32]; 
+  //assign cmt_o_rv32 = i_info[`DECINFO_RV32]; 
     // The cmt_o_pc_vld is used by the commit stage to check
     // if current instruction is outputing a valid current PC
     //   to guarante the commit to flush pipeline safely, this

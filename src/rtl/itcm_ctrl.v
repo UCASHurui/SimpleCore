@@ -25,7 +25,7 @@ module itcm_ctrl (
     output [`ITCM_RAM_AW-1:0] itcm_ram_addr,
     output [`ITCM_RAM_MW-1:0] itcm_ram_wem,
     output [`ITCM_RAM_DW-1:0] itcm_ram_din,
-    input [`ITCM_RAM_DW-1:0] itcm_ram_dout,
+    input [`ITCM_RAM_DW-1:0] itcm_ram_dout
     //output ifu2itcm_holdup,
 );
     //generate handshake signals with ifu for simulation purpose

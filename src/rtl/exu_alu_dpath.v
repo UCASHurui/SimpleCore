@@ -39,9 +39,9 @@ module exu_alu_dpath(
   input  bjp_req_alu_cmp_eq ,
   input  bjp_req_alu_cmp_ne ,
   input  bjp_req_alu_cmp_lt ,
-  input  bjp_req_alu_cmp_gt ,
+  input  bjp_req_alu_cmp_ge ,
   input  bjp_req_alu_cmp_ltu,
-  input  bjp_req_alu_cmp_gtu,
+  input  bjp_req_alu_cmp_geu,
   input  bjp_req_alu_add,
 
   output bjp_req_alu_cmp_res,
@@ -91,7 +91,7 @@ module exu_alu_dpath(
   output [33-1:0] muldiv_sbf_1_r,
 
   input  clk,
-  input  rst_n,
+  input  rst_n
   );
 
   wire [`XLEN-1:0] mux_op1;
@@ -388,9 +388,9 @@ module exu_alu_dpath(
             ,bjp_req_alu_cmp_eq 
             ,bjp_req_alu_cmp_ne 
             ,bjp_req_alu_cmp_lt 
-            ,bjp_req_alu_cmp_gt 
+            ,bjp_req_alu_cmp_ge 
             ,bjp_req_alu_cmp_ltu
-            ,bjp_req_alu_cmp_gtu
+            ,bjp_req_alu_cmp_geu
 
         })
       | ({DPATH_MUX_WIDTH{agu_req_alu}} & {

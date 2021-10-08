@@ -16,7 +16,7 @@ module lsu_ctrl (
     input agu_cmd_valid,
     output agu_cmd_ready,
     input agu_cmd_read,
-    input [`DTCM_AW-1:0] agu_cmd_addr,
+    input [`DTCM_RAM_AW-1:0] agu_cmd_addr,
     input [`XLEN-1:0] agu_cmd_wdata,
     input [`XLEN/8-1:0] agu_cmd_wmask,
     input [`ITAG_WIDTH-1:0] agu_cmd_itag,
@@ -27,7 +27,7 @@ module lsu_ctrl (
     output dtcm_cmd_valid,
     input dtcm_cmd_ready,
     output dtcm_cmd_read,
-    output [`DTCM_AW-1:0] dtcm_cmd_addr,
+    output [`DTCM_RAM_AW-1:0] dtcm_cmd_addr,
     output [`XLEN-1:0] dtcm_cmd_wdata,
     output [`XLEN/8-1:0] dtcm_cmd_wmask,
     input dtcm_rsp_valid,
@@ -54,18 +54,18 @@ module lsu_ctrl (
     //third pipeline stage
     //although OITF is 2 instructions deep, we only allow 1 outstanding instruction for lsu
     wire [`ITAG_WIDTH-1:0] agu_cmd_fifo_data = 
-        agu_cmd_itag,
+        agu_cmd_itag;
     wire fifo_i_valid = agu_cmd_valid;
     wire fifo_i_ready;
     wire fifo_o_valid;
     wire fifo_o_ready = 1'b1;
-
+    wire [`ITAG_WIDTH-1:0] fifo_o_rdata;
     assign lsu_o_wbck_itag= {`ITAG_WIDTH{wbck_hsked}}&fifo_o_rdata;
-
+  
     //Assume DTCM return data 1cycle later
     gnrl_pipe_stage #(
-        DW = `ITAG_WIDTH,
-        DP = 1
+        .DW(`ITAG_WIDTH),
+        .DP(1)
     ) u_lsu_pipe_stage (
         .i_vld(fifo_i_valid),
         .i_rdy(fifo_i_ready),

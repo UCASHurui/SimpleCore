@@ -7,11 +7,11 @@
 
 module exu_regfile (
     input [`RFIDX_WIDTH-1:0] read_src1_idx,
-    inptu [`RFIDX_WIDTH-1:0] read_src2_idx,
+    input [`RFIDX_WIDTH-1:0] read_src2_idx,
     output [`XLEN-1:0] read_src1_data,
     output [`XLEN-1:0] read_src2_data,
     
-    input [`RDIDX_WIDTH-1:0] wbck_dest_idx,
+    input [`RFIDX_WIDTH-1:0] wbck_dest_idx,
     input [`XLEN-1:0] wbck_dest_data,
     input wbck_dest_ena,
 

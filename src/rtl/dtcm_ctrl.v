@@ -25,7 +25,7 @@ module dtcm_ctrl (
     output [`DTCM_RAM_AW-1:0] dtcm_ram_addr,
     output [`DTCM_RAM_MW-1:0] dtcm_ram_wem,
     output [`DTCM_RAM_DW-1:0] dtcm_ram_din,
-    input [`DTCM_RAM_DW-1:0] dtcm_ram_dout,
+    input [`DTCM_RAM_DW-1:0] dtcm_ram_dout
 );
     //generate handshake signals with lsu for simulation purpose
     assign lsu2itcm_cmd_ready = 1;//only lsu can access dtcm, so dtcm is always ready for lsu

@@ -24,7 +24,7 @@ wire [`DTCM_RAM_DW-1:0] dtcm_ram_dout;
 //instantiate cpu
 cpu u_cpu (
     .inspect_pc(),
-    .pc_rtvec(pc_rtvec)
+    .pc_rtvec(pc_rtvec),
     .itcm_ram_we(itcm_ram_we),
     .itcm_ram_addr(itcm_ram_addr),
     .itcm_ram_din(itcm_ram_din),
@@ -36,7 +36,7 @@ cpu u_cpu (
     .dtcm_ram_wem(dtcm_ram_wem),
     .dtcm_ram_dout(dtcm_ram_dout),
     .clk(clk),
-    .purpose(purpose)
+    .rst_n(rst_n)
 );
 
 //instantiate sram

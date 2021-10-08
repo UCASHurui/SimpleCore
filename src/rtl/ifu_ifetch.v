@@ -35,8 +35,6 @@ module ifu_ifetch(
   input  ifu_rsp_valid, // Response valid 
   output ifu_rsp_ready, // Response ready
   input  ifu_rsp_err,   // Response error
-  // Note: the RSP channel always return a valid instruction fetched from the fetching start PC address.
-  // The targetd (ITCM, ICache or Sys-MEM) ctrl module will handle the unalign cases and split-and-merge works
   input  [`INSTR_SIZE-1:0] ifu_rsp_instr, // Response instruction
   // The Instruction Register stage to EXU interface
   output [`INSTR_SIZE-1:0] ifu_o_ir,// The instruction register
@@ -45,8 +43,6 @@ module ifu_ifetch(
   output [`RFIDX_WIDTH-1:0] ifu_o_rs1idx,
   output [`RFIDX_WIDTH-1:0] ifu_o_rs2idx,
   output ifu_o_prdt_taken,               // The Bxx is predicted as taken
-  //output ifu_o_misalgn,                  // The fetch misalign 
-  //output ifu_o_buserr,                   // The fetch bus error
   //output ifu_o_muldiv_b2b,               // The mul/div back2back case
   output ifu_o_valid, // Handshake signals with EXU stage
   input  ifu_o_ready,
@@ -77,61 +73,21 @@ module ifu_ifetch(
   wire ifu_ir_o_hsked = (ifu_o_valid & ifu_o_ready) ;
   wire pipe_flush_hsked = pipe_flush_req & pipe_flush_ack;
 
-  
- // The rst_flag is the synced version of rst_n
+  // The rst_flag is the synced version of rst_n
  //    * rst_n is asserted 
  // The rst_flag will be clear when
  //    * rst_n is de-asserted 
   wire reset_flag_r;
   gnrl_dffrs #(1) reset_flag_dffrs (1'b0, reset_flag_r, clk, rst_n);
- //
- // The reset_req valid is set when 
- //    * Currently reset_flag is asserting
- // The reset_req valid is clear when 
- //    * Currently reset_req is asserting
- //    * Currently the flush can be accepted by IFU
   wire reset_req_r;
   wire reset_req_set = (~reset_req_r) & reset_flag_r;
   wire reset_req_clr = reset_req_r & ifu_req_hsked;
   wire reset_req_ena = reset_req_set | reset_req_clr;
   wire reset_req_nxt = reset_req_set | (~reset_req_clr);
-
   gnrl_dfflr #(1) reset_req_dfflr (reset_req_ena, reset_req_nxt, reset_req_r, clk, rst_n);
-
   wire ifu_reset_req = reset_req_r;
-
-
-
-
-
- 
-  // The halt ack generation
-  /*
-  wire halt_ack_set;
-  wire halt_ack_clr;
-  wire halt_ack_ena;
-  wire halt_ack_r;
-  wire halt_ack_nxt;
-*/
-     // The halt_ack will be set when
-     // 1. Currently halt_req is asserting
-     // 2. Currently halt_ack is not asserting
-     // 3. Currently the ifetch REQ channel is ready, means there is no oustanding transactions
-  wire ifu_no_outs;
-  //assign halt_ack_set = ifu_halt_req & (~halt_ack_r) & ifu_no_outs;
-     // The halt_ack_r valid is cleared when 
-     //    * Currently halt_ack is asserting
-     //    * Currently halt_req is de-asserting
-  //assign halt_ack_clr = halt_ack_r & (~ifu_halt_req);
-
-  //assign halt_ack_ena = halt_ack_set | halt_ack_clr;
-  //assign halt_ack_nxt = halt_ack_set | (~halt_ack_clr);
-
-  //gnrl_dfflr #(1) halt_ack_dfflr (halt_ack_ena, halt_ack_nxt, halt_ack_r, clk, rst_n);
-
-  //assign ifu_halt_ack = halt_ack_r;
-
-
+  
+  
    // The flush ack signal generation
    //   Ideally the flush is acked when the ifetch interface is ready or there is rsponse valid 
    //   But to cut the comb loop between EXU and IFU, we always accept the flush, when it is not really acknowledged, we use a delayed flush indication to remember this flush
@@ -142,7 +98,7 @@ module ifu_ifetch(
    wire dly_flush_clr;
    wire dly_flush_ena;
    wire dly_flush_nxt;
-
+   /* not necessary since there is no extra instruction memory
    // The dly_flush will be set when there is a flush requst is coming, but the ifu is not ready to accept new fetch request
    wire dly_flush_r;
    assign dly_flush_set = pipe_flush_req & (~ifu_req_hsked);
@@ -155,8 +111,9 @@ module ifu_ifetch(
    gnrl_dfflr #(1) dly_flush_dfflr (dly_flush_ena, dly_flush_nxt, dly_flush_r, clk, rst_n);
 
    wire dly_pipe_flush_req = dly_flush_r;
-   wire pipe_flush_req_real = pipe_flush_req | dly_pipe_flush_req;
-
+   */
+   wire pipe_flush_req_real = pipe_flush_req;// | dly_pipe_flush_req;
+   
 
   // The IR register to be used in EXU for decoding
   wire ir_valid_set;
@@ -176,8 +133,8 @@ module ifu_ifetch(
   wire ifu_rsp_need_replay;
   wire pc_newpend_r;
   wire ifu_ir_i_ready;
-  assign ir_valid_set  = ifu_rsp_hsked & (~pipe_flush_req_real) & (~ifu_rsp_need_replay);
-  assign ir_pc_vld_set = pc_newpend_r & ifu_ir_i_ready & (~pipe_flush_req_real) & (~ifu_rsp_need_replay);
+  assign ir_valid_set  = ifu_rsp_hsked & (~pipe_flush_req_real);
+  assign ir_pc_vld_set = pc_newpend_r & ifu_ir_i_ready & (~pipe_flush_req_real);
   
   // The ir valid is cleared when it is accepted by EXU stage OR flushing 
   assign ir_valid_clr  = ifu_ir_o_hsked | (pipe_flush_hsked & ir_valid_r);
@@ -194,18 +151,12 @@ module ifu_ifetch(
   // IFU-IR loaded with the returned instruction from the IFetch RSP channel
   wire [`INSTR_SIZE-1:0] ifu_ir_nxt = ifu_rsp_instr;
   
-  // IFU-PC loaded with the current PC
-  wire ifu_err_nxt = ifu_rsp_err;
-
-  // IFU-IR and IFU-PC as the datapath register, only loaded and toggle when the valid reg is set
-  wire ifu_err_r;
-  gnrl_dfflr #(1) ifu_err_dfflr(ir_valid_set, ifu_err_nxt, ifu_err_r, clk, rst_n);
   wire prdt_taken;  
   wire ifu_prdt_taken_r;
   gnrl_dfflr #(1) ifu_prdt_taken_dfflr (ir_valid_set, prdt_taken, ifu_prdt_taken_r, clk, rst_n);
-  wire ifu_muldiv_b2b_nxt;
-  wire ifu_muldiv_b2b_r;
-  gnrl_dfflr #(1) ir_muldiv_b2b_dfflr (ir_valid_set, ifu_muldiv_b2b_nxt, ifu_muldiv_b2b_r, clk, rst_n);
+  //wire ifu_muldiv_b2b_nxt;
+  //wire ifu_muldiv_b2b_r;
+  //gnrl_dfflr #(1) ir_muldiv_b2b_dfflr (ir_valid_set, ifu_muldiv_b2b_nxt, ifu_muldiv_b2b_r, clk, rst_n);
      
   //To save power the H-16bits only loaded when it is 32bits length instrution, however all SimpleCore instruction is in 32 bit
   
@@ -220,21 +171,25 @@ module ifu_ifetch(
 
   // ******************* Modified **********************
   wire [`INSTR_SIZE-1:0] ifu_ir_r;// The instruction register
-  ir_ena = ir_valid_set;
-  gnrl_dfflr #('INSTR_SIZE/2) ifu_ir_dfflr (ir_ena, ifu_ir_nxt[31:16], ifu_ir_r[31:16], clk, rst_n);
+  wire ir_ena = ir_valid_set;
+  gnrl_dfflr #(`INSTR_SIZE/2) ifu_ir_dfflr (ir_ena, ifu_ir_nxt[31:16], ifu_ir_r[31:16], clk, rst_n);
 
   wire minidec_rs1en;
   wire minidec_rs2en;
   wire [`RFIDX_WIDTH-1:0] minidec_rs1idx;
   wire [`RFIDX_WIDTH-1:0] minidec_rs2idx;
-
   wire [`PC_SIZE-1:0] pc_r;
   wire [`PC_SIZE-1:0] ifu_pc_nxt = pc_r; // generate next oc
   wire [`PC_SIZE-1:0] ifu_pc_r;
+  wire [`RFIDX_WIDTH-1:0] ir_rs1idx_r;
+  wire [`RFIDX_WIDTH-1:0] ir_rs2idx_r;
+  gnrl_dfflr #(`RFIDX_WIDTH) ifu_rs1idx_dfflr (ir_pc_vld_set, minidec_rs1idx,  ir_rs1idx_r, clk, rst_n);
+  gnrl_dfflr #(`RFIDX_WIDTH) ifu_rs2idx_dfflr (ir_pc_vld_set, minidec_rs2idx,  ir_rs2idx_r, clk, rst_n);
   gnrl_dfflr #(`PC_SIZE) ifu_pc_dfflr (ir_pc_vld_set, ifu_pc_nxt,  ifu_pc_r, clk, rst_n);
 
   assign ifu_o_ir  = ifu_ir_r;
   assign ifu_o_pc  = ifu_pc_r;
+
 
   assign ifu_o_rs1idx = ir_rs1idx_r;
   assign ifu_o_rs2idx = ir_rs2idx_r;
@@ -327,7 +282,8 @@ module ifu_ifetch(
   wire bpu_wait;
   wire [`PC_SIZE-1:0] prdt_pc_add_op1;  
   wire [`PC_SIZE-1:0] prdt_pc_add_op2;
-
+  wire bpu2rf_rs1_ena;//note: not used
+  
   ifu_bpu u_ifu_bpu(
     .pc                       (pc_r),
    
@@ -358,11 +314,6 @@ module ifu_ifetch(
     .clk                      (clk  ) ,
     .rst_n                    (rst_n )                 
   );
-  
-  /*
-  // If the instruciton is 32bits length, increament 4, otherwise 2
-  //wire [2:0] pc_incr_ofst = minidec_rv32 ? 3'd4 : 3'd2;
-  */
 
   // all SimpleCore instruction is in 32 bit, hence increament is always 4
   wire [2:0] pc_incr_ofst = 3'd4;
@@ -375,53 +326,36 @@ module ifu_ifetch(
   wire ifetch_replay_req;
 
   wire [`PC_SIZE-1:0] pc_add_op1 = 
-                            `ifndef E203_TIMING_BOOST//}
                                pipe_flush_req  ? pipe_flush_add_op1 :
-                               dly_pipe_flush_req  ? pc_r :
-                            `endif//}
-                               ifetch_replay_req  ? pc_r :
                                bjp_req ? prdt_pc_add_op1    :
                                ifu_reset_req   ? pc_rtvec :
                                                  pc_r;
 
-  wire [`SIZE-1:0] pc_add_op2 =  
-                            /*`ifndef E203_TIMING_BOOST//}
+  wire [`PC_SIZE-1:0] pc_add_op2 =  
                                pipe_flush_req  ? pipe_flush_add_op2 :
-                               dly_pipe_flush_req  ? `PC_SIZE'b0 :
-                            `endif//} */
-                               ifetch_replay_req  ? `PC_SIZE'b0 :
                                bjp_req ? prdt_pc_add_op2    :
                                ifu_reset_req   ? `PC_SIZE'b0 :
                                                  pc_incr_ofst ;
 
-  assign ifu_req_seq = (~pipe_flush_req_real) & (~ifu_reset_req) & (~ifetch_replay_req) & (~bjp_req);
-  // assign ifu_req_seq_rv32 = minidec_rv32;  // since all instruction is in 32 bit
+  assign ifu_req_seq = (~pipe_flush_req_real)& (~ifu_reset_req) & (~bjp_req);
   assign ifu_req_last_pc = pc_r;
 //1
   assign pc_nxt_pre = pc_add_op1 + pc_add_op2;
   
-  `ifndef TIMING_BOOST//}
-  assign pc_nxt = {pc_nxt_pre[`PC_SIZE-1:1],1'b0};
-  `else//}{
-  //to check: there is no pipe_flush_pc
   assign pc_nxt = 
-               pipe_flush_req ? {pipe_flush_pc[`PC_SIZE-1:1],1'b0} :
-               dly_pipe_flush_req ? {pc_r[`PC_SIZE-1:1],1'b0} :
+               pipe_flush_req ? {pc_nxt_pre[`PC_SIZE-1:1],1'b0} :
                {pc_nxt_pre[`PC_SIZE-1:1],1'b0};
-  `endif//}
 
   // The Ifetch issue new ifetch request when
   //  1. it is a bjp insturction
   //  2. it does not need to wait
-  //  3. it is not a replay-set cycle
-  //  4. there is no halt_request
-  wire ifu_new_req = (~bpu_wait) & (~reset_flag_r) & (~ifu_rsp_need_replay);
+  wire ifu_new_req = (~bpu_wait)& (~reset_flag_r);
 
 
   // The fetch request valid is triggering when
   //      * New ifetch request
   //      * or The flush-request is pending
-  wire ifu_req_valid_pre = ifu_new_req | ifu_reset_req | pipe_flush_req_real | ifetch_replay_req;
+  wire ifu_req_valid_pre = ifu_new_req| ifu_reset_req | pipe_flush_req_real;
  
  
   // The new request ready condition is:
@@ -430,10 +364,6 @@ module ifu_ifetch(
   wire out_flag_clr;
   wire out_flag_r;
   wire new_req_condi = (~out_flag_r) | out_flag_clr;
-  assign ifu_no_outs   = (~out_flag_r) | ifu_rsp_valid;
-        // Here we use the rsp_valid rather than the out_flag_clr (ifu_rsp_hsked) because
-        //   as long as the rsp_valid is asserting then means last request have returned the
-        //   response back, in WFI case, we cannot expect it to be handshaked (otherwise deadlock)
 
   assign ifu_req_valid = ifu_req_valid_pre & new_req_condi;
 
@@ -453,7 +383,7 @@ module ifu_ifetch(
  assign inspect_pc = pc_r;
 
 
-  assign ifu_req_pc    = pc_nxt;
+  assign ifu_req_pc = pc_nxt;
 
      // The out_flag will be set if there is a new request handshaked
   wire out_flag_set = ifu_req_hsked;
@@ -475,23 +405,7 @@ module ifu_ifetch(
 
   gnrl_dfflr #(1) pc_newpend_dfflr (pc_newpend_ena, pc_newpend_nxt, pc_newpend_r, clk, rst_n);
 
-
   assign ifu_rsp_need_replay = 1'b0;
   assign ifetch_replay_req = 1'b0;
-
-  `ifndef FPGA_SOURCE//{
-  `ifndef DISABLE_SV_ASSERTION//{
-//synopsys translate_off
-
-CHECK_IFU_REQ_VALID_NO_X:
-  assert property (@(posedge clk) disable iff (~rst_n)
-                     (ifu_req_valid !== 1'bx)
-                  )
-  else $fatal ("\n Error: Oops, detected X value for ifu_req_valid !!! This should never happen. \n");
-
-//synopsys translate_on
-`endif//}
-`endif//}
-
 endmodule
 

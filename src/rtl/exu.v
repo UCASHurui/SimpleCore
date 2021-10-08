@@ -28,7 +28,7 @@ module exu (
     input lsu_wbck_i_valid,
     output lsu_wbck_i_ready,
     input [`XLEN-1:0] lsu_wbck_i_data,
-    input [`ITAG-1:0] lsu_wbck_i_itag,
+    input [`ITAG_WIDTH-1:0] lsu_wbck_i_itag,
     
     output oitf_empty,
     output [`XLEN-1:0] rf2ifu_x1,
@@ -84,14 +84,14 @@ exu_regfile u_exu_regfile (
 //instantiate decode
 wire [`DECINFO_WIDTH-1:0] dec_info;
 wire [`XLEN-1:0] dec_imm;
-//wire dec_rs1x0;
-//wire dec_rs2x0;
 wire dec_rdwen;
-wire [`PC_size-1:0] dec_pc;
+wire [`PC_SIZE-1:0] dec_pc;
 wire dec_illegal;
 wire [`RFIDX_WIDTH-1:0] dec_rs1idx;
 wire [`RFIDX_WIDTH-1:0] dec_rs2idx;
 wire [`RFIDX_WIDTH-1:0] dec_rdidx;
+wire dec_rs1en;
+wire dec_rs2en;
 
 exu_decode u_exu_decode (
     .i_instr(i_ir),//from ifu
@@ -135,12 +135,18 @@ wire [`PC_SIZE-1:0] disp_o_alu_pc;
 wire [`ITAG_WIDTH-1:0] disp_o_alu_itag;
 wire disp_o_alu_ilegl;
 
+wire oitfrd_match_disprs1;
+wire oitfrd_match_disprs2;
+wire oitfrd_match_disprd;
+wire disp_oitf_ready;
+wire [`ITAG_WIDTH-1:0] disp_oitf_ptr;
+wire disp_o_alu_ready;
+wire disp_o_alu_longpipe;
+
 exu_disp u_exu_disp (
     .oitf_empty(oitf_empty),//from oitf
     .disp_i_valid(i_valid),//from ifu
     .disp_i_ready(i_ready),//to ifu
-    //.disp_i_rs1x0(disp_i_rs1x0),
-    //.disp_i_rs2x0(disp_i_rs2x0),
     .disp_i_rs1idx(i_rs1idx),//from ifu minidec
     .disp_i_rs2idx(i_rs1idx),//from ifu minidec
     .disp_i_rs1en(dec_rs1en),//from dec
@@ -178,12 +184,10 @@ exu_disp u_exu_disp (
     .disp_oitf_rdwen(disp_oitf_rdwen),//to oitf
     .disp_oitf_rs1idx(disp_oitf_rs1idx),//to oitf
     .disp_oitf_rs2idx(disp_oitf_rs2idx),//to oitf
-    .disp_oitf_rdidx(disp_oitf_rdidx),//to oitf
+    .disp_oitf_rdidx(disp_oitf_rdidx)//to oitf
 );
 
 //instantiate alu
-wire disp_o_alu_ready;
-wire disp_o_alu_longpipe;
 wire alu_cmt_i_valid;
 wire [`XLEN-1:0] alu_cmt_i_imm;
 wire alu_cmt_i_bjp;
@@ -193,6 +197,8 @@ wire alu_cmt_i_bjp_rslv;
 wire alu_wbck_i_valid;
 wire [`XLEN-1:0] alu_wbck_i_data;
 wire [`RFIDX_WIDTH-1:0] alu_wbck_i_rdidx;
+wire alu_cmt_i_ready;
+wire alu_wbck_i_ready;
 exu_alu u_exu_alu (
     .i_valid(disp_o_alu_valid),//from disp
     .i_ready(disp_o_alu_ready),//to disp
@@ -212,19 +218,14 @@ exu_alu u_exu_alu (
 
     .cmt_o_valid(alu_cmt_i_valid),//to commit
     .cmt_o_ready(alu_cmt_i_ready),//from commit 
-    .cmt_o_pc_vld(),
-    .cmt_o_pc(),
-    .cmt_o_instr(),
     .cmt_o_imm(alu_cmt_i_imm),//to commit
-    .cmt_o_rv32(),
     .cmt_o_bjp(alu_cmt_i_bjp),//to commit
-    .cmt_o_ifu_misalgn(),
     .cmt_o_ifu_ilegl(alu_cmt_i_ilegl),//to commit
-    .cmt_o_bjp_prdt(cmt_o_bjp_prdt),//to commit
+    .cmt_o_bjp_prdt(alu_cmt_i_bjp_prdt),//to commit
     .cmt_o_bjp_rslv(alu_cmt_i_bjp_rslv),//to commit
 
     .wbck_o_valid(alu_wbck_i_valid),// to wbck
-    .wbck_o_ready(wbck_o_ready),//from wbck
+    .wbck_o_ready(alu_wbck_i_ready),//from wbck
     .wbck_o_wdat(alu_wbck_i_data),// to wbck
     .wbck_o_rdidx(alu_wbck_i_rdidx),// to wbck
 
@@ -247,7 +248,7 @@ exu_alu u_exu_alu (
 );
 
 //instantiate commit 
-wire alu_cmt_i_ready;
+
 exu_commit u_exu_commit (
     .nonflush_cmt_ena(),
     .alu_cmt_i_valid(alu_cmt_i_valid),//from alu
@@ -265,25 +266,18 @@ exu_commit u_exu_commit (
 );
 
 //instantiate oitf
-wire oitf_empty;
-wire oitfrd_match_disprs1;
-wire oitfrd_match_disprs1;
-wire oitfrd_match_disprs2;
-wire disp_oitf_ready;
-wire [`ITAG_WIDTH-1:0] disp_oitf_ptr;
 wire [`ITAG_WIDTH-1:0] oitf_ret_ptr;
 wire oitf_ret_ena;
-wire [`RFIDX_WIDTH-1:0] ret_rdidx;
-wire ret_rdwen;
+wire [`RFIDX_WIDTH-1:0] oitf_ret_rdidx;
+wire oitf_ret_rdwen;
 exu_oitf u_exu_oitf (
     .disp_ready(disp_oitf_ready),//to disp
     .disp_ena(disp_oitf_ena),//from disp
     .dis_ptr(disp_oitf_ptr),//to disp
-    .ret_ena(ret_ena),//to longp
+    .ret_ena(oitf_ret_ena),//to longp
     .ret_ptr(oitf_ret_ptr),//to longp
-    .ret_rdidx(ret_rdidx),//to longp
-    .ret_rdwen(ret_rdwen),//to longp
-    .ret_pc(),
+    .ret_rdidx(oitf_ret_rdidx),//to longp
+    .ret_rdwen(oitf_ret_rdwen),//to longp
     .disp_i_rs1en(disp_oitf_rs1en),//from disp
     .disp_i_rs2en(disp_oitf_rs2en),//from disp
     .disp_i_rdwen(disp_oitf_rdwen),//from disp
@@ -302,6 +296,7 @@ exu_oitf u_exu_oitf (
 wire longp_wbck_o_valid;
 wire [`XLEN-1:0] longp_wbck_o_data;
 wire [`RFIDX_WIDTH-1:0] longp_wbck_o_rdidx;
+wire longp_wbck_o_ready;
 
 exu_longpwbck u_exu_longpwbck (
     .lsu_wbck_i_valid(lsu_wbck_i_valid),//from lsu
@@ -315,12 +310,12 @@ exu_longpwbck u_exu_longpwbck (
     .oitf_empty(oitf_empty),//from oitf
     .oitf_ret_ptr(oitf_ret_ptr),//from oitf
     .oitf_ret_rdwen(oitf_ret_rdwen),//from oitf
-    .oitf_ret_ena(oitf_ret_ena)//from oitf
+    .oitf_ret_ena(oitf_ret_ena),//from oitf
+    .oitf_ret_rdidx(oitf_ret_rdidx)
 );
-//instantiate wbck
-wire alu_wbck_i_ready;
-wire longp_wbck_o_ready;
 
+
+//instantiate wbck
 exu_wbck u_exu_wbck (
     .alu_wbck_i_valid(alu_wbck_i_valid),//from alu
     .alu_wbck_i_ready(alu_wbck_i_ready),//to alu

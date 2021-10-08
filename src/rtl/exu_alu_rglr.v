@@ -9,7 +9,7 @@
 =============================================================================*/
 `include "defines.v"
 
-module alu_rglr(
+module exu_alu_rglr(
 
   //////////////////////////////////////////////////////////////
   // The Handshake Interface 
@@ -49,7 +49,7 @@ module alu_rglr(
 
   input  [`XLEN-1:0] alu_req_alu_res,
   input  clk,
-  input  rst_n,
+  input  rst_n
   );
 
   wire op2imm  = alu_i_info [`DECINFO_ALU_OP2IMM];                  //13 need imm 
