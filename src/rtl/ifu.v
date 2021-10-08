@@ -130,8 +130,8 @@ module ifu (
     //.dec2ifu_divu  (dec2ifu_divu  ),
     //.dec2ifu_remu  (dec2ifu_remu  ),
 
-    .clk           (clk          ),
-    .rst_n         (rst_n        ) 
+    .clk           (clk),
+    .rst_n         (rst_n) 
   );
 
 
