@@ -19,9 +19,9 @@ module exu_oitf (
     output ret_rdwen,
     //output ret [`PC_SIZE-1:0] ret_pc,//we don't support exception yet, so unecessary to return pc
 
-    input [`RFIDX_WIDTH-1:0] disp_i_rs1en,
-    input [`RFIDX_WIDTH-1:0] disp_i_rs2en,
-    input [`RFIDX_WIDTH-1:0] disp_i_rdwen,
+    input disp_i_rs1en,
+    input disp_i_rs2en,
+    input disp_i_rdwen,
     input [`RFIDX_WIDTH-1:0] disp_i_rs1idx,
     input [`RFIDX_WIDTH-1:0] disp_i_rs2idx,
     input [`RFIDX_WIDTH-1:0] disp_i_rdidx,
@@ -81,8 +81,8 @@ module exu_oitf (
             assign oitf_full = vld_r[0];
         end
     endgenerate
-    assign disp_ptr = alc_ptr_r;
-    assign ret_prt = ret_ptr_r;
+    assign dis_ptr = alc_ptr_r;
+    assign ret_ptr = ret_ptr_r;
     
     //ready to accept new instruction only when oitf not full(actually it is ok if an instruction is retiring but we choose to ignore such case)
     assign disp_ready = ~oitf_full;
@@ -117,5 +117,4 @@ module exu_oitf (
     
     assign ret_rdidx = rdidx_r[ret_ptr];
     assign ret_rdwen = rdwen_r[ret_ptr];
-    //assign ret_pc = pc_r[ret_ptr];
 endmodule

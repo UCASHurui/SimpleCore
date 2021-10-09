@@ -11,7 +11,7 @@ module itcm_ctrl (
     input ifu2itcm_cmd_valid,
     output ifu2itcm_cmd_ready,
     input ifu2itcm_cmd_read,
-    input [`ITCM_RAM_AW-1:0] ifu2itcm_cmd_addr,
+    input [`ITCM_ADDR_WIDTH-1:0] ifu2itcm_cmd_addr,
     input [`ITCM_RAM_MW-1:0] ifu2itcm_cmd_wmask,
     input [`ITCM_RAM_DW-1:0] ifu2itcm_cmd_wdata,
     
@@ -33,7 +33,7 @@ module itcm_ctrl (
     assign ifu2itcm_rsp_valid = ifu2itcm_cmd_valid;//valid when there is cmd from ifu
     assign itcm_ram_dout = itcm_ram_din;
     assign itcm_ram_we = ~ifu2itcm_cmd_read;
-    assign itcm_ram_addr = ifu2itcm_cmd_addr;
+    assign itcm_ram_addr = ifu2itcm_cmd_addr[`ITCM_ADDR_WIDTH-1:2];
     assign itcm_ram_wem = ifu2itcm_cmd_wmask;
     assign itcm_ram_din = ifu2itcm_cmd_wdata;
 endmodule

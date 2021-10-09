@@ -11,7 +11,7 @@ module core (
     //ifu to itcm interface
     output ifu2itcm_cmd_valid,
     input ifu2itcm_cmd_ready,
-    output [`ITCM_RAM_AW-1:0] ifu2itcm_cmd_addr,
+    output [`ITCM_ADDR_WIDTH-1:0] ifu2itcm_cmd_addr,
 
     input ifu2itcm_rsp_valid,
     output ifu2itcm_rsp_ready,
@@ -21,7 +21,7 @@ module core (
     output lsu2dtcm_cmd_valid,
     input lsu2dtcm_cmd_ready,
     output lsu2dtcm_cmd_read,
-    output [`DTCM_RAM_AW-1:0] lsu2dtcm_cmd_addr,
+    output [`DTCM_ADDR_WIDTH-1:0] lsu2dtcm_cmd_addr,
     output [`XLEN-1:0] lsu2dtcm_cmd_wdata,
     output [`XLEN/8-1:0] lsu2dtcm_cmd_wmask,
     input lsu2dtcm_rsp_valid,
@@ -73,8 +73,6 @@ ifu u_ifu (
     .ifu2itcm_rsp_ready(ifu2itcm_rsp_ready),//output to itcm_ctrl
     .ifu2itcm_rsp_rdata(ifu2itcm_rsp_rdata),//input from itcm_ctrl
 
-    //.ifu_halt_req(),
-    //.ifu_halt_ack(),
     .oitf_empty(oitf_empty),//from exu
     .rf2ifu_x1(rf2ifu_x1),//from exu
     .rf2ifu_rs1(rf2ifu_rs1),//from exu
@@ -86,11 +84,9 @@ ifu u_ifu (
 );
 
 //instantiate exu
-
 wire lsu_o_ready;
-
 wire agu_cmd_valid;
-wire [`DTCM_RAM_AW-1:0] agu_cmd_addr;
+wire [`DTCM_ADDR_WIDTH-1:0] agu_cmd_addr;
 wire agu_cmd_read;
 wire [`ITAG_WIDTH-1:0] agu_cmd_itag;
 wire [`XLEN-1:0] agu_cmd_wdata;

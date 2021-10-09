@@ -14,12 +14,12 @@ module cpu_top (
 wire itcm_ram_we;
 wire [`ITCM_RAM_AW-1:0] itcm_ram_addr;
 wire [`ITCM_RAM_DW-1:0] itcm_ram_din;
-wire itcm_ram_wem;
+wire [`ITCM_RAM_MW-1:0] itcm_ram_wem;
 wire [`ITCM_RAM_DW-1:0] itcm_ram_dout;
 wire dtcm_ram_we;
 wire [`DTCM_RAM_AW-1:0] dtcm_ram_addr;
 wire [`DTCM_RAM_DW-1:0] dtcm_ram_din;
-wire dtcm_ram_wem;
+wire [`DTCM_RAM_MW-1:0] dtcm_ram_wem;
 wire [`DTCM_RAM_DW-1:0] dtcm_ram_dout;
 //instantiate cpu
 cpu u_cpu (

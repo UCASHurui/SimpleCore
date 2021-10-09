@@ -69,7 +69,7 @@ module exu_alu(
   //    * Bus cmd channel
   output                         agu_cmd_valid,     // Handshake valid
   input                          agu_cmd_ready,    // Handshake ready
-  output [`DTCM_RAM_AW-1:0]        agu_cmd_addr,           // Bus transaction start addr 
+  output [`DTCM_ADDR_WIDTH-1:0]        agu_cmd_addr,           // Bus transaction start addr 
   output                         agu_cmd_read,      // Read or write
   output [`XLEN-1:0]             agu_cmd_wdata, 
   output [`XLEN/8-1:0] agu_cmd_wmask,

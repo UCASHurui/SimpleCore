@@ -34,7 +34,7 @@ module exu_alu_lsuagu(
   output                  agu_cmd_valid,            // Handshake valid
   input                   agu_cmd_ready,            // Handshake ready
 
-  output [`DTCM_RAM_AW-1:0] agu_cmd_addr,             // Bus transaction start addr 
+  output [`DTCM_ADDR_WIDTH-1:0] agu_cmd_addr,             // Bus transaction start addr 
   output                  agu_cmd_read,             // Read or write
   output [`XLEN-1:0]      agu_cmd_wdata,
   output [`XLEN/8-1:0] agu_cmd_wmask,
@@ -177,7 +177,7 @@ wire       agu_i_store   = agu_i_info [`DECINFO_AGU_STORE  ];
   assign agu_rsp_ready = 1'b1;
   
   assign agu_cmd_valid = agu_i_valid & agu_o_ready ;
-  assign agu_cmd_addr = agu_req_alu_res[`DTCM_RAM_DW-1:0];
+  assign agu_cmd_addr = agu_req_alu_res[`DTCM_ADDR_WIDTH-1:0];
 
   assign agu_cmd_read = agu_i_load;
      // The AGU CMD Wdata sources:

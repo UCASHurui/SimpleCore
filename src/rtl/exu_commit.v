@@ -14,6 +14,7 @@ module exu_commit (
     input alu_cmt_i_bjp,
     input alu_cmt_i_bjp_prdt,//predicted taken or not
     input alu_cmt_i_bjp_rslv,//resolved taken or not
+    input [`PC_SIZE-1:0] alu_cmt_i_pc,
     input alu_cmt_i_ilegl,
     //Flush interface to IFU
     output flush_pulse,
@@ -25,7 +26,6 @@ module exu_commit (
 );
 
     wire alu_brchmis_flush_ack = pipe_flush_ack;
-    assign pipe_flush_req = alu_brchmis_flush_req;
     wire [`PC_SIZE-1:0] alu_brchmis_add_op1;
     wire [`PC_SIZE-1:0] alu_brchmis_add_op2;
     assign pipe_flush_add_op1 = alu_brchmis_add_op1;
@@ -40,13 +40,12 @@ module exu_commit (
         .cmt_i_pc(alu_cmt_i_pc),
         .cmt_i_imm(alu_cmt_i_imm),
         .brchmis_flush_ack(alu_brchmis_flush_ack),
-        .brchmis_flush_req(alu_brchmis_flush_req),
+        .brchmis_flush_req(pipe_flush_req),
         .brchmis_flush_add_op1(alu_brchmis_add_op1),
         .brchmis_flush_add_op2(pipe_flush_add_op2)
     );
     
     assign flush_pulse = pipe_flush_ack & pipe_flush_req; //flush handshaked
-    //assign flush_req = ;
     wire cmt_ena = alu_cmt_i_valid & alu_cmt_i_ready;
     assign nonflush_cmt_ena = (~pipe_flush_req) & cmt_ena;
 endmodule

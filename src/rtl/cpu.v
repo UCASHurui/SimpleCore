@@ -27,7 +27,7 @@ module cpu (
 );
 wire ifu2itcm_cmd_valid;
 wire ifu2itcm_cmd_ready;
-wire [`ITCM_RAM_AW-1:0] ifu2itcm_cmd_addr;
+wire [`ITCM_ADDR_WIDTH-1:0] ifu2itcm_cmd_addr;
 wire ifu2itcm_cmd_read = 1'b1;//ifu not allowed to write itcm
 wire [`ITCM_RAM_DW-1:0] ifu2itcm_cmd_wdata = {`ITCM_RAM_DW{1'b0}}; //ifu not allowed to write itcm
 wire [`ITCM_RAM_MW-1:0] ifu2itcm_cmd_wmask = {`ITCM_RAM_MW{1'b0}}; //ifu not allowed to write itcm
@@ -35,6 +35,15 @@ wire ifu2itcm_rsp_valid;
 wire ifu2itcm_rsp_ready;
 wire [`ITCM_RAM_DW-1:0] ifu2itcm_rsp_rdata;
 
+wire lsu2dtcm_cmd_valid;
+wire lsu2dtcm_cmd_ready;
+wire lsu2dtcm_cmd_read;
+wire [`DTCM_ADDR_WIDTH-1:0] lsu2dtcm_cmd_addr;
+wire [`DTCM_RAM_DW-1:0] lsu2dtcm_cmd_wdata;
+wire [`DTCM_RAM_MW-1:0] lsu2dtcm_cmd_wmask;
+wire lsu2dtcm_rsp_valid;
+wire lsu2dtcm_rsp_ready;
+wire [`DTCM_RAM_DW-1:0] lsu2dtcm_rsp_rdata;
 //instantiate core
 core u_core (
     .inspect_pc(inspect_pc),

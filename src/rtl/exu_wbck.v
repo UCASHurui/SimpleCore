@@ -21,7 +21,7 @@ module exu_wbck (
     //final arbitrated write-back interface to regfile
     output rf_wbck_o_ena,
     output [`XLEN-1:0] rf_wbck_o_data,
-    output [`XLEN-1:0] rf_wbck_o_rdidx
+    output [`RFIDX_WIDTH-1:0] rf_wbck_o_rdidx
 );
     //long pipe(multicycle) instructions have higher wbck priority over 1cycle ALU instructions
     wire wbck_ready4alu = (~longp_wbck_i_valid);

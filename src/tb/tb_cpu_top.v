@@ -15,7 +15,7 @@ module tb_cpu_top;
     
     initial begin
         rst_n = 1;
-        pc_rtvec = {`PC_SIZE{4}};
+        pc_rtvec = {{`PC_SIZE-3{1'b0}},3'b100};
         #5 rst_n = 0;
         #5 rst_n = 1;
         #100 $finish;

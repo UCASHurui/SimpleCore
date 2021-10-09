@@ -11,7 +11,7 @@ module dtcm_ctrl (
     input lsu2dtcm_cmd_valid,
     output lsu2dtcm_cmd_ready,
     input lsu2dtcm_cmd_read,
-    input [`DTCM_RAM_AW-1:0] lsu2dtcm_cmd_addr,
+    input [`DTCM_ADDR_WIDTH-1:0] lsu2dtcm_cmd_addr,
     input [`DTCM_RAM_MW-1:0] lsu2dtcm_cmd_wmask,
     input [`DTCM_RAM_DW-1:0] lsu2dtcm_cmd_wdata,
     
@@ -32,7 +32,7 @@ module dtcm_ctrl (
     assign lsu2dtcm_rsp_valid = lsu2dtcm_cmd_valid;//dtcm rsp data come out in the same cycle, so always valid when there is cmd from lsu
     assign dtcm_ram_dout = dtcm_ram_din;
     assign dtcm_ram_we = ~lsu2dtcm_cmd_read;
-    assign dtcm_ram_addr = lsu2dtcm_cmd_addr;
+    assign dtcm_ram_addr = lsu2dtcm_cmd_addr[`DTCM_ADDR_WIDTH-1:2];
     assign dtcm_ram_wem = lsu2dtcm_cmd_wmask;
     assign dtcm_ram_din = lsu2dtcm_cmd_wdata;
 endmodule

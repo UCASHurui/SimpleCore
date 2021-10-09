@@ -18,15 +18,15 @@ module ifu_ifu2itcm(
   
   output ifu2itcm_cmd_valid, // Handshake valid
   input  ifu2itcm_cmd_ready, // Handshake ready
-  output [`ITCM_RAM_AW-1:0]   ifu2itcm_cmd_addr, //transcation to itcm start address
+  output [`ITCM_ADDR_WIDTH-1:0]   ifu2itcm_cmd_addr, //transcation to itcm start address
   input  ifu2itcm_rsp_valid, // Response valid 
   output ifu2itcm_rsp_ready, // Response ready
   input  [`ITCM_RAM_DW-1:0] ifu2itcm_rsp_rdata
-  );
+);
   
   assign ifu2itcm_cmd_valid = ifu_req_valid;
   assign ifu_req_ready = ifu2itcm_cmd_ready;
-  assign ifu2itcm_cmd_addr = ifu_req_pc[`ITCM_RAM_AW+2-1:2];//to check
+  assign ifu2itcm_cmd_addr = ifu_req_pc[`ITCM_ADDR_WIDTH-1:0];//to check
   assign ifu_rsp_valid = ifu2itcm_rsp_valid;
   assign ifu2itcm_rsp_ready = ifu_rsp_ready;
   assign ifu_rsp_instr = ifu2itcm_rsp_rdata;

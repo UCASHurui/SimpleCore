@@ -23,7 +23,7 @@ module exu_longpwbck (
     input [`ITAG_WIDTH-1:0] oitf_ret_ptr,
     input oitf_ret_rdwen,
     output oitf_ret_ena,
-    input oitf_ret_rdidx
+    input [`RFIDX_WIDTH-1:0] oitf_ret_rdidx
 );
 //longpipe wirte back follow the order of OITF
 //only when the retiring instruction match the toppest itag of OITF

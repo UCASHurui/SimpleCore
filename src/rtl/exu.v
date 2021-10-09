@@ -46,7 +46,7 @@ module exu (
     //AGU to lsu_ctrl
     output agu_cmd_valid,
     input agu_cmd_ready,
-    output [`DTCM_RAM_AW-1:0] agu_cmd_addr,
+    output [`DTCM_ADDR_WIDTH-1:0] agu_cmd_addr,
     output agu_cmd_read,
     output [`ITAG_WIDTH-1:0] agu_cmd_itag,
     output [`XLEN-1:0] agu_cmd_wdata,
@@ -199,6 +199,8 @@ wire [`XLEN-1:0] alu_wbck_i_data;
 wire [`RFIDX_WIDTH-1:0] alu_wbck_i_rdidx;
 wire alu_cmt_i_ready;
 wire alu_wbck_i_ready;
+wire [`PC_SIZE-1:0] alu_cmt_i_pc;
+
 exu_alu u_exu_alu (
     .i_valid(disp_o_alu_valid),//from disp
     .i_ready(disp_o_alu_ready),//to disp
@@ -218,12 +220,13 @@ exu_alu u_exu_alu (
 
     .cmt_o_valid(alu_cmt_i_valid),//to commit
     .cmt_o_ready(alu_cmt_i_ready),//from commit 
+    .cmt_o_pc(alu_cmt_i_pc),//to commit
     .cmt_o_imm(alu_cmt_i_imm),//to commit
     .cmt_o_bjp(alu_cmt_i_bjp),//to commit
     .cmt_o_ifu_ilegl(alu_cmt_i_ilegl),//to commit
     .cmt_o_bjp_prdt(alu_cmt_i_bjp_prdt),//to commit
     .cmt_o_bjp_rslv(alu_cmt_i_bjp_rslv),//to commit
-
+    
     .wbck_o_valid(alu_wbck_i_valid),// to wbck
     .wbck_o_ready(alu_wbck_i_ready),//from wbck
     .wbck_o_wdat(alu_wbck_i_data),// to wbck
@@ -257,6 +260,7 @@ exu_commit u_exu_commit (
     .alu_cmt_i_bjp(alu_cmt_i_bjp),//from alu
     .alu_cmt_i_bjp_prdt(alu_cmt_i_bjp_prdt),//from alu
     .alu_cmt_i_bjp_rslv(alu_cmt_i_bjp_rslv),//from alu
+    .alu_cmt_i_pc(alu_cmt_i_pc),//from alu
     .alu_cmt_i_ilegl(alu_cmt_i_ilegl),//from alu
     .pipe_flush_ack(pipe_flush_ack),//from ifu
     .pipe_flush_req(pipe_flush_req),// to ifu
