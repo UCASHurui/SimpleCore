@@ -18,7 +18,9 @@ module itcm_ram (
     .DW(`ITCM_RAM_DW),
     .MW(`ITCM_RAM_MW),
     .AW(`ITCM_RAM_AW),
-    .FORCE_X2ZERO(1)
+    .FORCE_X2ZERO(1),
+    .ITCM(1),
+    .DTCM(0)
     ) u_itcm_gnrl_ram(
     .clk(clk),
     .din(din),

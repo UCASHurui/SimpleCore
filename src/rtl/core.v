@@ -51,7 +51,6 @@ wire dec2ifu_rden;
 wire dec2ifu_rs1en;
 wire [`RFIDX_WIDTH-1:0] dec2ifu_rdidx;
 
-assign ifu2itcm_cmd_addr = inspect_pc[`PC_SIZE-1:`PC_SIZE - `ITCM_RAM_AW]; //ifu are only allowed to read itcm through pc addr
 ifu u_ifu (
     .inspect_pc(inspect_pc),
     .pc_rtvec(pc_rtvec),//from input
@@ -147,9 +146,6 @@ exu u_exu (
 );
 
 //instantiate lsu
-
-
-
 lsu u_lsu (
     .lsu_o_valid(lsu_o_valid),//to exu
     .lsu_o_ready(lsu_o_ready),//from exu

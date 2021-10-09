@@ -25,8 +25,8 @@ module ifu_ifu2itcm(
   );
   
   assign ifu2itcm_cmd_valid = ifu_req_valid;
-  assign ifu_req_ready = ifu2itcm_rsp_ready;
-  assign ifu2itcm_cmd_addr = ifu_req_pc[`PC_SIZE-1:`PC_SIZE-`ITCM_RAM_AW];
+  assign ifu_req_ready = ifu2itcm_cmd_ready;
+  assign ifu2itcm_cmd_addr = ifu_req_pc[`ITCM_RAM_AW+2-1:2];//to check
   assign ifu_rsp_valid = ifu2itcm_rsp_valid;
   assign ifu2itcm_rsp_ready = ifu_rsp_ready;
   assign ifu_rsp_instr = ifu2itcm_rsp_rdata;

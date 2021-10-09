@@ -93,25 +93,6 @@ module ifu_ifetch(
    //   But to cut the comb loop between EXU and IFU, we always accept the flush, when it is not really acknowledged, we use a delayed flush indication to remember this flush
    //   Note: Even if there is a delayed flush pending there, we still can accept new flush request
    assign pipe_flush_ack = 1'b1;
-
-   wire dly_flush_set;
-   wire dly_flush_clr;
-   wire dly_flush_ena;
-   wire dly_flush_nxt;
-   /* not necessary since there is no extra instruction memory
-   // The dly_flush will be set when there is a flush requst is coming, but the ifu is not ready to accept new fetch request
-   wire dly_flush_r;
-   assign dly_flush_set = pipe_flush_req & (~ifu_req_hsked);
-   
-   // The dly_flush_r valid is cleared when the delayed flush is issued
-   assign dly_flush_clr = dly_flush_r & ifu_req_hsked;
-   assign dly_flush_ena = dly_flush_set | dly_flush_clr;
-   assign dly_flush_nxt = dly_flush_set | (~dly_flush_clr);
-
-   gnrl_dfflr #(1) dly_flush_dfflr (dly_flush_ena, dly_flush_nxt, dly_flush_r, clk, rst_n);
-
-   wire dly_pipe_flush_req = dly_flush_r;
-   */
    wire pipe_flush_req_real = pipe_flush_req;// | dly_pipe_flush_req;
    
 
@@ -130,7 +111,6 @@ module ifu_ifetch(
 
 
   // The ir valid is set when there is new instruction fetched AND no flushing 
-  wire ifu_rsp_need_replay;
   wire pc_newpend_r;
   wire ifu_ir_i_ready;
   assign ir_valid_set  = ifu_rsp_hsked & (~pipe_flush_req_real);
@@ -276,7 +256,7 @@ module ifu_ifetch(
       //.dec_remu    (minidec_remu),
 
       .dec_jalr_rs1idx (minidec_jalr_rs1idx),
-      .dec_bjp_imm (minidec_bjp_imm    )
+      .dec_bjp_imm (minidec_bjp_imm)
   );
 
   wire bpu_wait;
@@ -317,13 +297,10 @@ module ifu_ifetch(
 
   // all SimpleCore instruction is in 32 bit, hence increament is always 4
   wire [2:0] pc_incr_ofst = 3'd4;
-
   wire [`PC_SIZE-1:0] pc_nxt_pre;
   wire [`PC_SIZE-1:0] pc_nxt;
 
   wire bjp_req = minidec_bjp & prdt_taken;
-
-  wire ifetch_replay_req;
 
   wire [`PC_SIZE-1:0] pc_add_op1 = 
                                pipe_flush_req  ? pipe_flush_add_op1 :
@@ -342,9 +319,7 @@ module ifu_ifetch(
 //1
   assign pc_nxt_pre = pc_add_op1 + pc_add_op2;
   
-  assign pc_nxt = 
-               pipe_flush_req ? {pc_nxt_pre[`PC_SIZE-1:1],1'b0} :
-               {pc_nxt_pre[`PC_SIZE-1:1],1'b0};
+  assign pc_nxt = {pc_nxt_pre[`PC_SIZE-1:2],2'b00};
 
   // The Ifetch issue new ifetch request when
   //  1. it is a bjp insturction
@@ -356,8 +331,6 @@ module ifu_ifetch(
   //      * New ifetch request
   //      * or The flush-request is pending
   wire ifu_req_valid_pre = ifu_new_req| ifu_reset_req | pipe_flush_req_real;
- 
- 
   // The new request ready condition is:
   //   * No outstanding reqeusts
   //   * Or if there is outstanding, but it is reponse valid back
@@ -379,10 +352,7 @@ module ifu_ifetch(
 
   gnrl_dfflr #(`PC_SIZE) pc_dfflr (pc_ena, pc_nxt, pc_r, clk, rst_n);
 
-
- assign inspect_pc = pc_r;
-
-
+  assign inspect_pc = pc_r;
   assign ifu_req_pc = pc_nxt;
 
      // The out_flag will be set if there is a new request handshaked
@@ -402,10 +372,6 @@ module ifu_ifetch(
   wire pc_newpend_ena = pc_newpend_set | pc_newpend_clr;
      // If meanwhile set and clear, then set preempt
   wire pc_newpend_nxt = pc_newpend_set | (~pc_newpend_clr);
-
   gnrl_dfflr #(1) pc_newpend_dfflr (pc_newpend_ena, pc_newpend_nxt, pc_newpend_r, clk, rst_n);
-
-  assign ifu_rsp_need_replay = 1'b0;
-  assign ifetch_replay_req = 1'b0;
 endmodule
 

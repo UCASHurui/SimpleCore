@@ -79,7 +79,7 @@ exu_regfile u_exu_regfile (
     .x1_data(rf2ifu_x1),
     .clk(clk),
     .rst_n(rst_n)
-);
+);  
 
 //instantiate decode
 wire [`DECINFO_WIDTH-1:0] dec_info;
@@ -100,8 +100,8 @@ exu_decode u_exu_decode (
     .dec_rs1en(dec_rs1en),//to disp
     .dec_rs2en(dec_rs2en),//to disp
     .dec_rdwen(dec_rdwen),//to disp
-    .dec_rs1idx(),//from ifu minidec
-    .dec_rs2idx(),//from ifu minidec
+    .dec_rs1idx(),
+    .dec_rs2idx(),
     .dec_rdidx(dec_rdidx),//to disp
     .dec_info(dec_info),//to disp
     .dec_imm(dec_imm),//to disp
@@ -147,8 +147,8 @@ exu_disp u_exu_disp (
     .oitf_empty(oitf_empty),//from oitf
     .disp_i_valid(i_valid),//from ifu
     .disp_i_ready(i_ready),//to ifu
-    .disp_i_rs1idx(i_rs1idx),//from ifu minidec
-    .disp_i_rs2idx(i_rs1idx),//from ifu minidec
+    .disp_i_rs1idx(i_rs1idx),//from ifu rs1idx_r
+    .disp_i_rs2idx(i_rs1idx),//from ifu rs2idx_r
     .disp_i_rs1en(dec_rs1en),//from dec
     .disp_i_rs2en(dec_rs2en),//from dec
     .disp_i_rdwen(dec_rdwen),//from dec
@@ -235,7 +235,7 @@ exu_alu u_exu_alu (
     .agu_cmd_addr(agu_cmd_addr),//to lsu
     .agu_cmd_read(agu_cmd_read),//to lsu
     .agu_cmd_wdata(agu_cmd_wdata),//to lsu
-    .agu_cmd_wmask(agu_cmd_wmask),//to check
+    .agu_cmd_wmask(agu_cmd_wmask),//to lsu
     .agu_cmd_size(),
     .agu_cmd_back2agu(),
     .agu_cmd_itag(agu_cmd_itag),//to lsu
@@ -258,7 +258,6 @@ exu_commit u_exu_commit (
     .alu_cmt_i_bjp_prdt(alu_cmt_i_bjp_prdt),//from alu
     .alu_cmt_i_bjp_rslv(alu_cmt_i_bjp_rslv),//from alu
     .alu_cmt_i_ilegl(alu_cmt_i_ilegl),//from alu
-    .flush_pulse(),
     .pipe_flush_ack(pipe_flush_ack),//from ifu
     .pipe_flush_req(pipe_flush_req),// to ifu
     .pipe_flush_add_op1(pipe_flush_add_op1),// to ifu
@@ -311,7 +310,7 @@ exu_longpwbck u_exu_longpwbck (
     .oitf_ret_ptr(oitf_ret_ptr),//from oitf
     .oitf_ret_rdwen(oitf_ret_rdwen),//from oitf
     .oitf_ret_ena(oitf_ret_ena),//from oitf
-    .oitf_ret_rdidx(oitf_ret_rdidx)
+    .oitf_ret_rdidx(oitf_ret_rdidx)//from oitf
 );
 
 

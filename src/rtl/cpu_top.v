@@ -6,7 +6,7 @@
 `include "defines.v"
 
 module cpu_top (
-    input pc_rtvec,//initial value of pc
+    input[`PC_SIZE-1:0] pc_rtvec,//initial value of pc
     input clk,
     input rst_n
 );

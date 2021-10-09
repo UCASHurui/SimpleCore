@@ -10,7 +10,9 @@ module sim_ram#(
     parameter DW = 32,//data width
     parameter MW= 4,//mask width
     parameter AW = 32,//address width
-    parameter FORCE_X2ZERO = 0
+    parameter FORCE_X2ZERO = 0,
+    parameter ITCM = 0,//instantiate as ITCM RAM
+    parameter DTCM = 0 //instantiate as DTCM RAM
 ) (
     input  clk,
     input[DW-1:0] din,
@@ -72,4 +74,10 @@ module sim_ram#(
             assign dout = dout_pre;
         end
     endgenerate
+
+    initial begin
+        if (ITCM==1) begin
+            mem_r[0] = 32'b0000000_00000_00000_001_00001_011_0111;  
+        end
+    end
 endmodule
