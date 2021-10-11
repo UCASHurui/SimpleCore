@@ -34,7 +34,6 @@ module ifu_ifetch(
   // Insrtuction Fetch Response channel
   input  ifu_rsp_valid, // Response valid 
   output ifu_rsp_ready, // Response ready
-  input  ifu_rsp_err,   // Response error
   input  [`INSTR_SIZE-1:0] ifu_rsp_instr, // Response instruction
   // The Instruction Register stage to EXU interface
   output [`INSTR_SIZE-1:0] ifu_o_ir,// The instruction register
@@ -93,7 +92,7 @@ module ifu_ifetch(
    //   But to cut the comb loop between EXU and IFU, we always accept the flush, when it is not really acknowledged, we use a delayed flush indication to remember this flush
    //   Note: Even if there is a delayed flush pending there, we still can accept new flush request
    assign pipe_flush_ack = 1'b1;
-   wire pipe_flush_req_real = pipe_flush_req;// | dly_pipe_flush_req;
+   wire pipe_flush_req_real = pipe_flush_req;
    
 
   // The IR register to be used in EXU for decoding
@@ -192,40 +191,6 @@ module ifu_ifetch(
   wire [`RFIDX_WIDTH-1:0] minidec_jalr_rs1idx;
   wire jalr_rs1idx_cam_irrdidx = ir_rden & (minidec_jalr_rs1idx == ir_rdidx) & ir_valid_r;
 
-  /* currently multiplication/division are unsupported
-  // MULDIV BACK2BACK Fusing
-  // To detect the sequence of MULH[[S]U] rdh, rs1, rs2;    MUL rdl, rs1, rs2
-  // To detect the sequence of     DIV[U] rdq, rs1, rs2; REM[U] rdr, rs1, rs2  
-  wire minidec_mul ;
-  wire minidec_div ;
-  wire minidec_rem ;
-  wire minidec_divu;
-  wire minidec_remu;
-  assign ifu_muldiv_b2b_nxt = 
-      (
-          // For multiplicaiton, only the MUL instruction following
-          //    MULH/MULHU/MULSU can be treated as back2back
-          ( minidec_mul & dec2ifu_mulhsu)
-          // For divider and reminder instructions, only the following cases
-          //    can be treated as back2back
-          //      * DIV--REM
-          //      * REM--DIV
-          //      * DIVU--REMU
-          //      * REMU--DIVU
-        | ( minidec_div  & dec2ifu_rem)
-        | ( minidec_rem  & dec2ifu_div)
-        | ( minidec_divu & dec2ifu_remu)
-        | ( minidec_remu & dec2ifu_divu)
-      )
-      // The last rs1 and rs2 indexes are same as this instruction
-      & (ir_rs1idx_r == ir_rs1idx_nxt)
-      & (ir_rs2idx_r == ir_rs2idx_nxt)
-      // The last rs1 and rs2 indexes are not same as last RD index
-      & (~(ir_rs1idx_r == ir_rdidx))
-      & (~(ir_rs2idx_r == ir_rdidx))
-      ;
-   */
-
   // Next PC generation
   wire minidec_bjp;
   wire minidec_jal;
@@ -236,18 +201,14 @@ module ifu_ifetch(
   // The mini-decoder to check instruciton length and branch type 
   ifu_minidec u_ifu_minidec (
       .instr       (ifu_ir_nxt         ),
-
       .dec_rs1en   (minidec_rs1en      ),
       .dec_rs2en   (minidec_rs2en      ),
       .dec_rs1idx  (minidec_rs1idx     ),
       .dec_rs2idx  (minidec_rs2idx     ),
-
-      //.dec_rv32    (minidec_rv32       ), //instruction is all in 32 bit
       .dec_bjp     (minidec_bjp        ),
       .dec_jal     (minidec_jal        ),
       .dec_jalr    (minidec_jalr       ),
       .dec_bxx     (minidec_bxx        ),
-
       //.dec_mulhsu  (),
       //.dec_mul     (minidec_mul ),
       //.dec_div     (minidec_div ),
@@ -303,15 +264,15 @@ module ifu_ifetch(
   wire bjp_req = minidec_bjp & prdt_taken;
 
   wire [`PC_SIZE-1:0] pc_add_op1 = 
+                               ifu_reset_req   ? pc_rtvec :
                                pipe_flush_req  ? pipe_flush_add_op1 :
                                bjp_req ? prdt_pc_add_op1    :
-                               ifu_reset_req   ? pc_rtvec :
                                                  pc_r;
 
   wire [`PC_SIZE-1:0] pc_add_op2 =  
+                               ifu_reset_req   ? `PC_SIZE'b0 :
                                pipe_flush_req  ? pipe_flush_add_op2 :
                                bjp_req ? prdt_pc_add_op2    :
-                               ifu_reset_req   ? `PC_SIZE'b0 :
                                                  pc_incr_ofst ;
 
   assign ifu_req_seq = (~pipe_flush_req_real)& (~ifu_reset_req) & (~bjp_req);
@@ -341,7 +302,8 @@ module ifu_ifetch(
   assign ifu_req_valid = ifu_req_valid_pre & new_req_condi;
 
   //wire ifu_rsp2ir_ready = (ifu_rsp_replay | pipe_flush_req_real) ? 1'b1 : (ifu_ir_i_ready & (~bpu_wait));
-  wire ifu_rsp2ir_ready = (pipe_flush_req_real) ? 1'b1 : (ifu_ir_i_ready & ifu_req_ready & (~bpu_wait));
+  wire ifu_rsp2ir_ready = (pipe_flush_req_real) ? 1'b1 : 
+                           reset_req_r ? 1'b1:(ifu_ir_i_ready & ifu_req_ready & (~bpu_wait));
 
   // Response channel only ready when:
   //   * IR is ready to accept new instructions

@@ -75,7 +75,6 @@ module ifu (
   wire [`PC_SIZE-1:0]   ifu_req_pc; 
   wire ifu_rsp_valid; 
   wire ifu_rsp_ready; 
-  wire ifu_rsp_err;   
   wire [`INSTR_SIZE-1:0] ifu_rsp_instr; 
 
   ifu_ifetch u_ifu_ifetch(
@@ -84,11 +83,8 @@ module ifu (
     .ifu_req_valid (ifu_req_valid),
     .ifu_req_ready (ifu_req_ready),
     .ifu_req_pc    (ifu_req_pc   ),
-    .ifu_req_seq     ( ),
-    .ifu_req_last_pc ( ),
     .ifu_rsp_valid (ifu_rsp_valid),
     .ifu_rsp_ready (ifu_rsp_ready),
-    .ifu_rsp_err   (ifu_rsp_err  ),
     .ifu_rsp_instr (ifu_rsp_instr),
     .ifu_o_ir      (ifu_o_ir     ),
     .ifu_o_pc      (ifu_o_pc     ),
