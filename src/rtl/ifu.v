@@ -88,11 +88,9 @@ module ifu (
     .ifu_rsp_instr (ifu_rsp_instr),
     .ifu_o_ir      (ifu_o_ir     ),
     .ifu_o_pc      (ifu_o_pc     ),
-    .ifu_o_pc_vld  ( ),
     .ifu_o_rs1idx  (ifu_o_rs1idx),
     .ifu_o_rs2idx  (ifu_o_rs2idx),
     .ifu_o_prdt_taken(ifu_o_prdt_taken),
-    //.ifu_o_muldiv_b2b(ifu_o_muldiv_b2b),
     .ifu_o_valid   (ifu_o_valid  ),
     .ifu_o_ready   (ifu_o_ready  ),
     .pipe_flush_ack     (pipe_flush_ack    ), 
@@ -106,12 +104,6 @@ module ifu (
     .dec2ifu_rden  (dec2ifu_rden ),
     .dec2ifu_rs1en (dec2ifu_rs1en),
     .dec2ifu_rdidx (dec2ifu_rdidx),
-    //.dec2ifu_mulhsu(dec2ifu_mulhsu),
-    //.dec2ifu_div   (dec2ifu_div   ),
-    //.dec2ifu_rem   (dec2ifu_rem   ),
-    //.dec2ifu_divu  (dec2ifu_divu  ),
-    //.dec2ifu_remu  (dec2ifu_remu  ),
-
     .clk           (clk),
     .rst_n         (rst_n) 
   );
