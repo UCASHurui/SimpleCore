@@ -124,11 +124,11 @@ module exu_alu(
                      ;
 
   wire agu_i_longpipe;
-  wire mdv_i_longpipe;
+ // wire mdv_i_longpipe;
 
 
   assign i_longpipe = (agu_i_longpipe & agu_op)    
-                    | (mdv_i_longpipe & mdv_op) 
+                   // | (mdv_i_longpipe & mdv_op) 
                    ;
 
   
