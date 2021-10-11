@@ -93,7 +93,6 @@ module ifu (
     .ifu_o_prdt_taken(ifu_o_prdt_taken),
     .ifu_o_valid   (ifu_o_valid  ),
     .ifu_o_ready   (ifu_o_ready  ),
-    .pipe_flush_ack     (pipe_flush_ack    ), 
     .pipe_flush_req     (pipe_flush_req    ),
     .pipe_flush_add_op1 (pipe_flush_add_op1),     
     .pipe_flush_add_op2 (pipe_flush_add_op2), 

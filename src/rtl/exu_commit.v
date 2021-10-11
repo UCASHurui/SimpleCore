@@ -29,7 +29,7 @@ module exu_commit (
     wire [`PC_SIZE-1:0] alu_brchmis_add_op1;
     wire [`PC_SIZE-1:0] alu_brchmis_add_op2;
     assign pipe_flush_add_op1 = alu_brchmis_add_op1;
-    assign pipe_flush_add_op2 = pipe_flush_add_op2;
+    assign pipe_flush_add_op2 = alu_brchmis_add_op2;
 
     exu_branchslv u_exu_branchslv (
         .cmt_i_valid(alu_cmt_i_valid),
@@ -42,7 +42,7 @@ module exu_commit (
         .brchmis_flush_ack(alu_brchmis_flush_ack),
         .brchmis_flush_req(pipe_flush_req),
         .brchmis_flush_add_op1(alu_brchmis_add_op1),
-        .brchmis_flush_add_op2(pipe_flush_add_op2)
+        .brchmis_flush_add_op2(alu_brchmis_add_op2)
     );
     
     assign flush_pulse = pipe_flush_ack & pipe_flush_req; //flush handshaked
