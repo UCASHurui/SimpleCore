@@ -19,9 +19,8 @@ module sim_ram#(
     input[AW-1:0] addr,
     input we,
     input[MW-1:0] wem,//write enable mask
-    output [DW-1:0] dout
+    output[DW-1:0] dout,
 );
-
     reg [DW-1:0] mem_r[0:DP-1];
     reg [AW-1:0] addr_r;
     wire [MW-1:0] wen;
@@ -36,7 +35,7 @@ module sim_ram#(
             addr_r <= addr;
         end
     end
-    
+  
     genvar i;
     generate
         for(i = 0; i<MW; i = i + 1) begin
@@ -75,14 +74,13 @@ module sim_ram#(
       endgenerate
     */
     
-    
+   
     initial begin
-        if (ITCM == 1) begin
-            mem_r[0] <= 32'b0000000_00000_00000_001_00001_011_0111;//lui
-            mem_r[1] <= 32'b0000000_00000_00000_001_00001_011_0111;//lui
-            mem_r[2] <= 32'b0000000_00000_00000_001_00001_011_0111;//lui
-            mem_r[3] <= 32'b0000000_00000_00000_001_00001_011_0111;//lui
+        if (ITCM==1) begin
+            mem_r[0] = 32'b0000000_00000_00000_001_00001_011_0111;//lui
+            mem_r[1] = 32'b0000000_00000_00000_001_00001_011_0110;//lui
+            mem_r[2] = 32'b0000000_00000_00000_001_00001_011_0101;//lui
+            mem_r[3] = 32'b0000000_00000_00000_001_00001_011_0100;//lui
         end
     end
-
 endmodule

@@ -22,7 +22,7 @@ module exu_branchslv (
 );
 wire brchmis_need_flush = cmt_i_bjp
                                             & (cmt_i_bjp_prdt ^ cmt_i_bjp_rslv); // prediction != resolve then flush
-assign brchmis_flush_req = cmt_i_valid & brchmis_need_flush;
+brchmis_flush_req = cmt_i_valid & brchmis_need_flush;
 //wire brchmis_flush_hsked = brchmis_flush_req & brchmis_flush_ack;
 
 assign cmt_i_ready = (~cmt_i_bjp) | 
