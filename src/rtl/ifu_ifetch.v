@@ -33,7 +33,10 @@ module ifu_ifetch(
    input  clk,
    input  rst_n
 );
-
+   reg [`PC_SIZE-1:0] pc; 
+   wire [`PC_SIZE-1:0] pc_r = pc;
+   wire prdt_taken;
+   wire ir_nop_instr_r;
    //instantiate minidec
    wire minidec_bjp;
    wire minidec_jal;
@@ -80,14 +83,14 @@ module ifu_ifetch(
       .prdt_taken               (prdt_taken     ),  
       .prdt_pc_add_op1          (prdt_pc_add_op1),  
       .prdt_pc_add_op2          (prdt_pc_add_op2),
-      .ir_nop_instr              (ir_nop_instr_r)
+      .ir_nop_instr              (ir_nop_instr_r),
       .rf2bpu_x1                (rf2ifu_x1    ),
       .rf2bpu_rs1               (rf2ifu_rs1   ),
       .clk                      (clk  ) ,
       .rst_n                    (rst_n )                 
    );
    wire ifu_o_hsked = (ifu_o_valid & ifu_o_ready);//instruction accepted by exu
-   wire ifu_req_valid = (~bpu_wait) & ifu_o_hsked;
+   assign ifu_req_valid = ifu_o_hsked;
    wire ifu_req_hsked  = (ifu_req_valid & ifu_req_ready);
    wire ifu_rsp_hsked  = (ifu_rsp_valid & ifu_rsp_ready);
    assign pipe_flush_ack = 1'b1;//always accept pipeflush
@@ -100,7 +103,7 @@ module ifu_ifetch(
    wire [`PC_SIZE-1:0] ifu_pc_r;
    wire [`RFIDX_WIDTH-1:0] ir_rs1idx_r;
    wire [`RFIDX_WIDTH-1:0] ir_rs2idx_r;
-   wire prdt_taken;  
+   
    wire ifu_prdt_taken_r;
    //ifu_pc, rs1idx, rs2idx, prdt_taken allowed to change once the instruction is accepted by exu
    gnrl_dfflr #(`PC_SIZE) ifu_pc_dfflr (ifu_o_hsked, ifu_pc_nxt,  ifu_pc_r, clk, rst_n);
@@ -115,7 +118,7 @@ module ifu_ifetch(
    wire ir_nop_instr_set = bpu_wait & ifu_o_hsked;
    wire ir_nop_instr_clr = ir_nop_instr_r;
    wire ir_nop_instr_nxt = ir_nop_instr_set | (~ir_nop_instr_clr);
-   wire ir_nop_instr_r;
+   
    gnrl_dfflr #(1) ir_nop_instr_dfflr (ifu_o_hsked, ir_nop_instr_nxt, ir_nop_instr_r, clk, rst_n);
 
    assign ifu_o_rs1idx = ir_rs1idx_r;
@@ -140,19 +143,18 @@ module ifu_ifetch(
 
    wire [`PC_SIZE-1:0] pc_nxt_pre = pc_add_op1 + pc_add_op2;
    wire [`PC_SIZE-1:0] pc_nxt = {pc_nxt_pre[`PC_SIZE-1:2],2'b00};
-   reg [`PC_SIZE-1:0] pc_r; 
    always @(posedge clk or negedge rst_n) begin
       if(rst_n == 1'b0) begin: reset
-         pc_r <= pc_rtvec;
+         pc <= pc_rtvec;
       end
       else begin
-        pc_r <= pc_nxt;
+        pc <= pc_nxt;
       end
    end
-
-   assign ifu_req_last_pc = pc_r;
+    
+   //assign ifu_req_last_pc = pc_r;
    assign ifu_rsp_ready = 1'b1;
    assign inspect_pc = pc_r;
-   assign ifu_req_pc = pc_nxt;
+   assign ifu_req_pc = pc_r;
    endmodule
 

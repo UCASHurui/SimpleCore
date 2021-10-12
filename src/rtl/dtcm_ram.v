@@ -18,7 +18,7 @@ module dtcm_ram (
     .DW(`DTCM_RAM_DW),
     .MW(`DTCM_RAM_MW),
     .AW(`DTCM_RAM_AW),
-    .FORCE_X2ZERO(1),
+    .FORCE_X2ZERO(0),
     .ITCM(0),
     .DTCM(1)
     ) u_dtcm_gnrl_ram(
