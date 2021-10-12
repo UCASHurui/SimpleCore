@@ -100,9 +100,7 @@
 `define DTCM_RAM_DP (1<<(`DTCM_ADDR_WIDTH - 2))//DTCM depth
 `define DTCM_RAM_DW 32//DTCM datawidth in bit
 `define DTCM_RAM_MW 4//DTCM mask width in bit
-
 `define INSTR_NOP `INSTR_SIZE'b0000000_00000_00000_000_00000_001_0011
-
 
 
 

@@ -17,7 +17,7 @@ wire [`ITCM_RAM_DW-1:0] itcm_ram_din;
 wire [`ITCM_RAM_MW-1:0] itcm_ram_wem;
 wire [`ITCM_RAM_DW-1:0] itcm_ram_dout;
 wire dtcm_ram_we;
-wire [`DTCM_RAM_AW-1:0] dtcm_ram_addr;
+wire[`DTCM_RAM_AW-1:0] dtcm_ram_addr;
 wire [`DTCM_RAM_DW-1:0] dtcm_ram_din;
 wire [`DTCM_RAM_MW-1:0] dtcm_ram_wem;
 wire [`DTCM_RAM_DW-1:0] dtcm_ram_dout;

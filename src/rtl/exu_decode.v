@@ -37,6 +37,22 @@ module exu_decode (
     output [`RFIDX_WIDTH-1:0] dec_jalr_rs1idx,
     output [`XLEN-1:0] dec_bjp_imm
 );
+
+//=================================================
+//regfile related signals
+wire need_rs1 = ~(rv32_lui | rv32_auipc | rv32_jal) ;
+wire need_rs2 = rv32_branch | rv32_store | rv32_op;
+wire need_rd = ~(rv32_branch | rv32_store);
+
+wire[`RFIDX_WIDTH-1:0] rs1_idx = i_instr[19:15];
+wire[`RFIDX_WIDTH-1:0] rs2_idx = i_instr[24:20];
+wire[`RFIDX_WIDTH-1:0] rd_idx = i_instr[11:7];
+wire rs1_x0 = rs1_idx == {`RFIDX_WIDTH{1'b0}};
+wire rd_x0 = rd_idx == {`RFIDX_WIDTH{1'b0}};
+wire rs1_x31 = rs1_idx == {`RFIDX_WIDTH{1'b1}};
+wire rs2_x31 = rs1_idx == {`RFIDX_WIDTH{1'b1}};
+wire rd_x31 = rd_idx == {`RFIDX_WIDTH{1'b1}};
+
 //=================================================
 //opcode & func3 & func7 signals
 wire opcode_1_0_00 = i_instr[1:0] == 2'b00;
@@ -209,20 +225,7 @@ assign agu_info_bus[`DECINFO_AGU_SIZE] = lsu_info_size;//0 for byte, 1for half w
 assign agu_info_bus[`DECINFO_AGU_USIGN] = lsu_info_usign;
 assign agu_info_bus[`DECINFO_AGU_OP2IMM] = need_imm;
 
-//=================================================
-//regfile related signals
-wire need_rs1 = ~(rv32_lui | rv32_auipc | rv32_jal) ;
-wire need_rs2 = rv32_branch | rv32_store | rv32_op;
-wire need_rd = ~(rv32_branch | rv32_store);
 
-wire[`RFIDX_WIDTH-1:0] rs1_idx = i_instr[19:15];
-wire[`RFIDX_WIDTH-1:0] rs2_idx = i_instr[24:20];
-wire[`RFIDX_WIDTH-1:0] rd_idx = i_instr[11:7];
-wire rs1_x0 = rs1_idx == {`RFIDX_WIDTH{1'b0}};
-wire rd_x0 = rd_idx == {`RFIDX_WIDTH{1'b0}};
-wire rs1_x31 = rs1_idx == {`RFIDX_WIDTH{1'b1}};
-wire rs2_x31 = rs1_idx == {`RFIDX_WIDTH{1'b1}};
-wire rd_x31 = rd_idx == {`RFIDX_WIDTH{1'b1}};
 
 //=================================================
 //immediate

@@ -98,7 +98,7 @@ module ifu_ifetch(
    //if-ex interface
    wire pc_hold_req = (~ifu_o_hsked) | bpu_wait;//handshake with exu failed or hazard
    wire [`INSTR_SIZE-1:0] ifu_ir_r;
-   wire [`INSTR_SIZE-1:0] ifu_ir_nxt = (bpu_wait & ifu_o_hsked)? `INSTR_NOP : ifu_rsp_instr;//inject nop when current instruction is accepted by exu and bpu_wait asserted
+   wire [`INSTR_SIZE-1:0] ifu_ir_nxt = (bpu_wait & ifu_o_hsked)? `INSTR_NOP:ifu_rsp_instr;//inject nop when current instruction is accepted by exu and bpu_wait asserted
    wire [`PC_SIZE-1:0] ifu_pc_nxt = pc_r;
    wire [`PC_SIZE-1:0] ifu_pc_r;
    wire [`RFIDX_WIDTH-1:0] ir_rs1idx_r;
@@ -144,7 +144,7 @@ module ifu_ifetch(
    wire [`PC_SIZE-1:0] pc_nxt_pre = pc_add_op1 + pc_add_op2;
    wire [`PC_SIZE-1:0] pc_nxt = {pc_nxt_pre[`PC_SIZE-1:2],2'b00};
    always @(posedge clk or negedge rst_n) begin
-      if(rst_n == 1'b0) begin: reset
+      if(rst_n == 1'b0) begin
          pc <= pc_rtvec;
       end
       else begin

@@ -40,7 +40,7 @@ module lsu_ctrl (
     wire wbck_hsked = dtcm_rsp_ready & dtcm_rsp_valid;
     assign lsu_o_valid = wbck_hsked;
     assign lsu_o_wbck_data = {`XLEN{wbck_hsked}} & dtcm_rsp_rdata;
-
+    wire fifo_i_ready;
     assign agu_cmd_ready = fifo_i_ready; //dtcm ready to accept new instruction when there is no existing outstand lsu instruction
     assign agu_rsp_valid = wbck_hsked;
     
@@ -56,7 +56,7 @@ module lsu_ctrl (
     wire [`ITAG_WIDTH-1:0] agu_cmd_fifo_data = 
         agu_cmd_itag;
     wire fifo_i_valid = agu_cmd_valid;
-    wire fifo_i_ready;
+   
     wire fifo_o_valid;
     wire fifo_o_ready = 1'b1;
     wire [`ITAG_WIDTH-1:0] fifo_o_rdata;
