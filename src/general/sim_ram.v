@@ -57,9 +57,7 @@ module sim_ram#(
         end
     endgenerate
     
-    wire [DW-1:0] dout_pre;
-    assign dout_pre = mem_r[addr_r];
-    assign dout = dout_pre;
+    assign dout = mem_r[addr_r];
     /*
       generate
        if(FORCE_X2ZERO == 1) begin: force_x_to_zero

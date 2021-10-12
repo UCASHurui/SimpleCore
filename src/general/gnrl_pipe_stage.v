@@ -30,8 +30,8 @@ module gnrl_pipe_stage #(
     assign vld_ena = vld_set | vld_clr;
     assign vld_nxt = vld_set | (~ vld_clr);
 
-    gnrl_dfflr #(1) vld_dfflr(vld_ena, vld_nxt, vld_r, clk);
-    gnrl_dfflr #(DW) dat_dfflr(vld_set, i_dat, o_dat, clk);
+    gnrl_dfflr #(1) vld_dfflr(vld_ena, vld_nxt, vld_r, clk, rst_n);
+    gnrl_dfflr #(DW) dat_dfflr(vld_set, i_dat, o_dat, clk, rst_n);
 
     assign o_vld = vld_r;
     assign i_rdy = (~vld_r) | vld_clr;

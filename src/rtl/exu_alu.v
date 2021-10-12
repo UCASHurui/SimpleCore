@@ -554,22 +554,13 @@ module exu_alu(
 
   assign wbck_o_rdidx = i_rdidx; 
   wire wbck_o_rdwen = i_rdwen;                  
-  wire wbck_o_err = 
-                    ({1{o_sel_alu}} & alu_o_wbck_err)
-                  | ({1{o_sel_bjp}} & bjp_o_wbck_err)
-                  | ({1{o_sel_agu}} & agu_o_wbck_err)
-                      `ifdef SUPPORT_SHARE_MULDIV //{
-                  | ({1{o_sel_mdv}} & mdv_o_wbck_err)
-                      `endif//SUPPORT_SHARE_MULDIV}
-                  | ({1{o_sel_ifu_excp}} & ifu_excp_o_wbck_err)
-                  ;
 
   //  Each Instruction need to commit or write-back
   //   * The write-back only needed when the unit need to write-back
   //     the result (need to write RD), and it is not a long-pipe uop
   //     (need to be write back by its long-pipe write-back, not here)
   //   * Each instruction need to be commited 
-  wire o_need_wbck = wbck_o_rdwen & (~i_longpipe) & (~wbck_o_err);
+  wire o_need_wbck = wbck_o_rdwen & (~i_longpipe);
   wire o_need_cmt  = 1'b1;
   assign o_ready = 
            (o_need_cmt  ? cmt_o_ready  : 1'b1)  
