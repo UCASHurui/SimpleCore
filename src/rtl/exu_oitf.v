@@ -101,8 +101,8 @@ module exu_oitf (
             assign vld_nxt[i] = vld_set[i] | (~vld_clr[i]);
 
             gnrl_dfflr #(1) vld_dfflr(vld_ena[i], vld_nxt[i], vld_r[i], clk, rst_n);
-            gnrl_dffl #(`RFIDX_WIDTH) rdidx_dffl(vld_set[i], disp_i_rdidx, rdidx_r[i],clk);
-            gnrl_dffl #(1) rdwen_dffl(vld_set[i], disp_i_rdwen, rdwen_r[i], clk);
+            gnrl_dfflr #(`RFIDX_WIDTH) rdidx_dffl(vld_set[i], disp_i_rdidx, rdidx_r[i],clk, rst_n);
+            gnrl_dfflr #(1) rdwen_dffl(vld_set[i], disp_i_rdwen, rdwen_r[i], clk, rst_n);
 
 
             assign rd_match_rs1idx[i] = vld_r[i] & rdwen_r[i] & disp_i_rs1en & (rdidx_r[i] == disp_i_rs1idx);
