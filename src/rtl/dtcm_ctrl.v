@@ -28,7 +28,7 @@ module dtcm_ctrl (
     input [`DTCM_RAM_DW-1:0] dtcm_ram_dout
 );
     //generate handshake signals with lsu for simulation purpose
-    assign lsu2itcm_cmd_ready = 1;//only lsu can access dtcm, so dtcm is always ready for lsu
+    assign lsu2dtcm_cmd_ready = 1;//only lsu can access dtcm, so dtcm is always ready for lsu
     assign lsu2dtcm_rsp_valid = lsu2dtcm_cmd_valid;//dtcm rsp data come out in the same cycle, so always valid when there is cmd from lsu
     assign lsu2dtcm_rsp_rdata = dtcm_ram_dout;
     assign dtcm_ram_we = ~lsu2dtcm_cmd_read;
