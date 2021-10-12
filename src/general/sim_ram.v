@@ -36,7 +36,7 @@ module sim_ram#(
             addr_r <= addr;
         end
     end
-    /*
+    
     genvar i;
     generate
         for(i = 0; i<MW; i = i + 1) begin
@@ -56,7 +56,7 @@ module sim_ram#(
             end
         end
     endgenerate
-    */
+    
     wire [DW-1:0] dout_pre;
     assign dout_pre = mem_r[addr_r];
     assign dout = dout_pre;
