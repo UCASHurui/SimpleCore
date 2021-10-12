@@ -77,8 +77,7 @@ wire disp_condition = (~dep)
                                     //maybe critical path here
 //handshake
 wire disp_i_valid_pos = disp_condition & disp_i_valid;
-wire disp_i_ready_pos = disp_o_alu_ready;// ToCheck:what about oitf ready
-assign disp_i_ready = disp_condition & disp_i_ready_pos;
+assign disp_i_ready = disp_condition & disp_o_alu_ready;
 assign disp_o_alu_valid = disp_i_valid_pos;
 
 //dispatch to alu

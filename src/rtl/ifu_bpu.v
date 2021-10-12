@@ -23,9 +23,8 @@ module ifu_bpu(
   // The Instruction Register index and OITF status to be used for checking dependency
   // if SimpleCore actually needs OITF
   input  oitf_empty, //Oustanding Instructions Track FIFO to hold all the non-ALU long pipeline instruction's status and information
-  input  ir_empty,
   input  ir_rs1en,
-  input  jalr_rs1idx_cam_irrdidx,
+  input  jalr_rs1idx_match_irrdidx,
   
   // The add op to next-pc adder
   output bpu_wait,  
@@ -36,8 +35,7 @@ module ifu_bpu(
   input  dec_i_valid,
 
   // The RS1 to read regfile
-  output bpu2rf_rs1_ena,
-  input  ir_valid_clr,
+  input  ir_nop_instr,
   input  [`XLEN-1:0] rf2bpu_x1,
   input  [`XLEN-1:0] rf2bpu_rs1,
 
@@ -88,27 +86,10 @@ module ifu_bpu(
         2. Index of target write-back register of current instruction in IR is x1, indicates ReadAfterWrite dependency  
      ** xn is DEPENDENT when:
         1. OITF is NOT empty, indicates long instruction being excuted
-        2. IR is NOT empty, indicates instruction in IR may be able to write back to xn. 
+        2. IR is NOT empty(not nop instruction), indicates instruction in IR may be able to write back to xn. 
   */
-  wire jalr_rs1x1_dep = dec_i_valid & dec_jalr & dec_jalr_rs1x1 & ((~oitf_empty) | (jalr_rs1idx_cam_irrdidx));
-  wire jalr_rs1xn_dep = dec_i_valid & dec_jalr & dec_jalr_rs1xn & ((~oitf_empty) | (~ir_empty));
- 
-  // If only depend to IR stage (OITF is empty), then if IR is under clearing, or
-  // it does not use RS1 index, then we can also treat it as non-dependency
-  wire jalr_rs1xn_dep_ir_clr = (jalr_rs1xn_dep & oitf_empty & (~ir_empty)) & (ir_valid_clr | (~ir_rs1en));
-
-
-  // To read xn from ReadPort1 in RegFile, discriminate if ReadPort1 is available and non-conflict
-  wire rs1xn_rdrf_r;
-  wire rs1xn_rdrf_set = (~rs1xn_rdrf_r) & dec_i_valid & dec_jalr & dec_jalr_rs1xn & ((~jalr_rs1xn_dep) | jalr_rs1xn_dep_ir_clr);
-  wire rs1xn_rdrf_clr = rs1xn_rdrf_r;
-  wire rs1xn_rdrf_ena = rs1xn_rdrf_set |   rs1xn_rdrf_clr;
-  wire rs1xn_rdrf_nxt = rs1xn_rdrf_set | (~rs1xn_rdrf_clr);
-
-  gnrl_dfflr #(1) rs1xn_rdrf_dfflrs(rs1xn_rdrf_ena, rs1xn_rdrf_nxt, rs1xn_rdrf_r, clk, rst_n);
-
-  // generate enable signal of using ReadPort1 in RegFile, the signal loads rs1 index register to read RegFile. (BPU2RegFile_rs1_enable)
-  assign bpu2rf_rs1_ena = rs1xn_rdrf_set;
+  wire jalr_rs1x1_dep = dec_i_valid & dec_jalr & dec_jalr_rs1x1 & ((~oitf_empty) | (jalr_rs1idx_match_irrdidx));
+  wire jalr_rs1xn_dep = dec_i_valid & dec_jalr & dec_jalr_rs1xn & (~oitf_empty) & (~ir_nop_instr);
 
   /*
   To set when bpu needs to wait.
@@ -116,7 +97,7 @@ module ifu_bpu(
   2. xn dependency exists
   3. At clock period of reading xn from RegFile using ReadPort1 in RegFile, here to stop IFU from generating next PC till dependency discharged and xn is read from RegFile
   */
-  assign bpu_wait = jalr_rs1x1_dep | jalr_rs1xn_dep | rs1xn_rdrf_set;
+  assign bpu_wait = jalr_rs1x1_dep | jalr_rs1xn_dep;
 
   /* 
   all PC shares the same ADDER to save area 

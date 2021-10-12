@@ -56,25 +56,26 @@ module sim_ram#(
         end
     endgenerate
 
-    wire [DW-1:0] dout_pre;
-    assign dout_pre = mem_r[addr_r];
+    //wire [DW-1:0] dout_pre;
+    assign dout = mem_r[addr_r][DW-1:0];
     
-    assign dout = mem_r[addr_r];
-    generate
-        if(FORCE_X2ZERO == 1) begin
-            for(i=0; i<DW; i=i+1) begin
-                `ifdef SYNTHESIS
-                assign dout[i] = (dout_pre[i] === 1'bx) ? 1'b0 : dout_pre[i];
-                `else
-                assign dout[i] = dout_pre[i];
-                `endif
-            end
-        end
-        else begin
-            assign dout = dout_pre;
-        end
-    endgenerate
-
+    //assign dout = dout_pre;
+    /*
+      generate
+       if(FORCE_X2ZERO == 1) begin: force_x_to_zero
+          for (i = 0; i < DW; i = i+1) begin:force_x_gen 
+              `ifndef SYNTHESIS//{
+             assign dout[i] = (dout_pre[i] === 1'bx) ? 1'b0 : dout_pre[i];
+              `else//}{
+             assign dout[i] = dout_pre[i];
+              `endif//}
+          end
+       end
+       else begin:no_force_x_to_zero
+         assign dout = dout_pre;
+       end
+      endgenerate
+    */
     initial begin
         if (ITCM==1) begin
             mem_r[0] = 32'b0000000_00000_00000_001_00001_011_0111;//lui
