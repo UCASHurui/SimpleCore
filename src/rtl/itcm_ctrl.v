@@ -31,7 +31,7 @@ module itcm_ctrl (
     //generate handshake signals with ifu for simulation purpose
     assign ifu2itcm_cmd_ready = 1;//only ifu can access itcm, so itcm is always ready for ifu
     assign ifu2itcm_rsp_valid = ifu2itcm_cmd_valid;//valid when there is cmd from ifu
-    assign itcm_ram_dout = itcm_ram_din;
+    assign ifu2itcm_rsp_rdata = itcm_ram_dout;
     assign itcm_ram_we = ~ifu2itcm_cmd_read;
     assign itcm_ram_addr = ifu2itcm_cmd_addr[`ITCM_ADDR_WIDTH-1:2];
     assign itcm_ram_wem = ifu2itcm_cmd_wmask;
