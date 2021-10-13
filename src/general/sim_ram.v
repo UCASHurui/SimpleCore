@@ -19,7 +19,7 @@ module sim_ram#(
     input[AW-1:0] addr,
     input we,
     input[MW-1:0] wem,//write enable mask
-    output[DW-1:0] dout,
+    output[DW-1:0] dout
 );
     reg [DW-1:0] mem_r[0:DP-1];
     reg [AW-1:0] addr_r;
