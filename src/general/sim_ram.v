@@ -120,12 +120,12 @@ module sim_ram#(
             */
         end
     end
-    /*
+
     initial begin
         if (DTCM==1) begin
             for(i = 0; i < DP; i = i+1) 
                 mem_r[i] = 32'b0000000_00000_00000_000_00000_000_0001;
         end
     end
-    */
+
 endmodule
