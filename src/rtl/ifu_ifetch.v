@@ -115,7 +115,7 @@ module ifu_ifetch(
    assign ifu_o_pc  = ifu_pc_r;//ouput to exu
    // ir_nop_instr register(pipeling bubble)
    // indicating the instr in IR reg is a nop instr
-   wire ir_nop_instr_set = bpu_wait & ifu_o_hsked;
+   wire ir_nop_instr_set = bpu_wait & ifu_o_hsked;//to check
    wire ir_nop_instr_clr = ir_nop_instr_r;
    wire ir_nop_instr_nxt = ir_nop_instr_set | (~ir_nop_instr_clr);
    
