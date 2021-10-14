@@ -1,1 +1,1 @@
-`define  CFG_OITF_DEPTH_IS_2
+`define  CFG_OITF_DEPTH_IS_1

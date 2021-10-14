@@ -67,6 +67,8 @@ module exu_alu_lsuagu(
   output agu_sbf_1_ena,
   output [`XLEN-1:0] agu_sbf_1_nxt,
   input  [`XLEN-1:0] agu_sbf_1_r,
+  input  [`XLEN-1:0]      agu_rsp_rdata,
+
 
   input  clk,
   input  rst_n
@@ -113,37 +115,6 @@ wire       agu_i_store   = agu_i_info [`DECINFO_AGU_STORE  ];
   assign state_last_exit_ena = 1'b0;
  
   /////////////////////////////////////////////////////////////////////////////////
-  // Implement the leftover 0 buffer
-  wire leftover_ena;
-  wire [`XLEN-1:0] leftover_nxt;
-  wire [`XLEN-1:0] leftover_r;
-  wire leftover_err_nxt;
-  wire leftover_err_r;
-
-  wire [`XLEN-1:0] leftover_1_r;
-  wire leftover_1_ena;
-  wire [`XLEN-1:0] leftover_1_nxt;
-  /*leftover buffer
-  assign leftover_ena = agu_rsp_hsked & (1'b0);
-  assign leftover_nxt = {`XLEN{1'b0}};                                 
-  assign leftover_err_nxt = 1'b0 ;
- 
-  // The instantiation of leftover buffer is actually shared with the ALU SBF-0 Buffer
-  assign agu_sbf_0_ena = leftover_ena;
-  assign agu_sbf_0_nxt = leftover_nxt;
-  assign leftover_r    = agu_sbf_0_r;
-
-  // The error bit is implemented here
-  gnrl_dfflr #(1) leftover_err_dfflr (leftover_ena, leftover_err_nxt, leftover_err_r, clk, rst_n);
-  
-  assign leftover_1_ena = 1'b0 ;
-  assign leftover_1_nxt = agu_req_alu_res;
-  //
-  // The instantiation of last_addr buffer is actually shared with the ALU SBF-1 Buffer
-  assign agu_sbf_1_ena   = leftover_1_ena;
-  assign agu_sbf_1_nxt   = leftover_1_nxt;
-  assign leftover_1_r = agu_sbf_1_r;
-*/
 
   assign agu_req_alu_add  = 1'b0 | sta_is_idle;
   assign agu_req_alu_op1 =  sta_is_idle ? agu_i_rs1: `XLEN'd0 ;
@@ -186,9 +157,9 @@ wire       agu_i_store   = agu_i_info [`DECINFO_AGU_STORE  ];
                                     ({`XLEN{agu_i_size_b }} & {4{agu_i_rs2[ 7:0]}})
                                   | ({`XLEN{agu_i_size_hw}} & {2{agu_i_rs2[15:0]}})
                                   | ({`XLEN{agu_i_size_w }} & {1{agu_i_rs2[31:0]}});
-  assign agu_cmd_wmask =             ({`XLEN/8{agu_i_size_b }} & (4'b0001 << agu_cmd_addr[1:0]))
-          | ({`XLEN/8{agu_i_size_hw}} & (4'b0011 << {agu_cmd_addr[1],1'b0}))
-          | ({`XLEN/8{agu_i_size_w }} & (4'b1111));
+  assign agu_cmd_wmask = ({`XLEN/8{agu_i_size_b }} & (4'b0001 << agu_cmd_addr[1:0]))
+                        | ({`XLEN/8{agu_i_size_hw}} & (4'b0011 << {agu_cmd_addr[1],1'b0}))
+                        | ({`XLEN/8{agu_i_size_w }} & (4'b1111));
        
   assign agu_cmd_wdata = algnst_wdata;
   //assign agu_cmd_back2agu = 1'b0 ;

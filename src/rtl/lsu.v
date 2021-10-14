@@ -51,6 +51,7 @@ lsu_ctrl u_lsu_ctrl (
     .agu_cmd_itag(agu_cmd_itag),
     .agu_rsp_valid(agu_rsp_valid),
     .agu_rsp_ready(agu_rsp_ready),
+    .agu_rsp_rdata(agu_rsp_rdata),
     .dtcm_cmd_valid(dtcm_cmd_valid),
     .dtcm_cmd_ready(dtcm_cmd_ready),
     .dtcm_cmd_read(dtcm_cmd_read),
@@ -62,6 +63,7 @@ lsu_ctrl u_lsu_ctrl (
     .dtcm_rsp_rdata(dtcm_rsp_rdata),
     .clk(clk),
     .rst_n(rst_n)
+    
 );
     
 endmodule
