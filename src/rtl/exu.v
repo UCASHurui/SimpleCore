@@ -27,7 +27,7 @@ module exu (
     //LSU Write-Back interface
     input lsu_wbck_i_valid,
     output lsu_wbck_i_ready,
-    input [`XLEN-1:0] lsu_wbck_i_data,
+    input [`XLEN-1:0] lsu_i_wbck_wdat,
     input [`ITAG_WIDTH-1:0] lsu_wbck_i_itag,
     
     output oitf_empty,
@@ -298,14 +298,15 @@ exu_oitf u_exu_oitf (
 //instantiate longp
 wire longp_wbck_o_valid;
 wire [`XLEN-1:0] longp_wbck_o_data;
+wire [`XLEN-1:0] lsu_i_wbck_wdat ;
 wire [`RFIDX_WIDTH-1:0] longp_wbck_o_rdidx;
 wire longp_wbck_o_ready;
 
 exu_longpwbck u_exu_longpwbck (
     .lsu_wbck_i_valid(lsu_wbck_i_valid),//from lsu
     .lsu_wbck_i_ready(lsu_wbck_i_ready),//to lsu
-    .lsu_wbck_i_data(lsu_wbck_i_data),//from lsu
     .lsu_wbck_i_itag(lsu_wbck_i_itag),//from lsu
+    .lsu_wbck_i_wdat    (lsu_i_wbck_wdat  ),
     .longp_wbck_o_valid(longp_wbck_o_valid),//to wbck
     .longp_wbck_o_ready(longp_wbck_o_ready),//from wbck
     .longp_wbck_o_data(longp_wbck_o_data),//to wbck

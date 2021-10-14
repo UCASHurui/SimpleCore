@@ -93,7 +93,7 @@ wire [`XLEN-1:0] agu_cmd_wdata;
 wire [`XLEN/8-1:0] agu_cmd_wmask;
 wire agu_rsp_ready;
 wire lsu_o_valid;
-wire [`XLEN-1:0] lsu_o_wbck_data;
+wire [`XLEN-1:0] lsu_o_wbck_wdat;
 wire [`ITAG_WIDTH-1:0] lsu_o_wbck_itag;
 wire agu_cmd_ready;
 wire agu_rsp_valid;
@@ -113,8 +113,8 @@ exu u_exu (
 
     .lsu_wbck_i_valid(lsu_o_valid),//from lsu
     .lsu_wbck_i_ready(lsu_o_ready),//to lsu
-    .lsu_wbck_i_data(lsu_o_wbck_data),//from lsu
     .lsu_wbck_i_itag(lsu_o_wbck_itag),//from lsu
+    .lsu_i_wbck_wdat(lsu_o_wbck_wdat),
 
     .oitf_empty(oitf_empty),//to ifu
     .rf2ifu_x1(rf2ifu_x1),//to ifu
@@ -145,8 +145,8 @@ exu u_exu (
 lsu u_lsu (
     .lsu_o_valid(lsu_o_valid),//to exu
     .lsu_o_ready(lsu_o_ready),//from exu
-    .lsu_o_wbck_data(lsu_o_wbck_data),//to exu
     .lsu_o_wbck_itag(lsu_o_wbck_itag),//to exu
+    .lsu_o_wbck_wdat(lsu_o_wbck_wdat),
 
     .agu_cmd_valid(agu_cmd_valid),//from exu
     .agu_cmd_ready(agu_cmd_ready),//to exu

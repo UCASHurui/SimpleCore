@@ -9,8 +9,7 @@ module lsu_ctrl (
     //The LSU write-back interface(to longpipe wbck)
     output lsu_o_valid,
     input lsu_o_ready,
-
-    output [`XLEN-1:0] lsu_o_wbck_data,
+    output [`XLEN-1:0] lsu_o_wbck_wdat,
     output [`ITAG_WIDTH-1:0] lsu_o_wbck_itag,
 
     //AGU to LSU-ctrl interface
@@ -23,7 +22,6 @@ module lsu_ctrl (
     input [`ITAG_WIDTH-1:0] agu_cmd_itag,
     output agu_rsp_valid,
     input agu_rsp_ready,
-    output [`XLEN-1:0] agu_rsp_rdata,
 
     //LSU to DTCM interface
     output dtcm_cmd_valid,
@@ -41,7 +39,7 @@ module lsu_ctrl (
 );
     wire wbck_hsked = dtcm_rsp_ready & dtcm_rsp_valid;
     assign lsu_o_valid = wbck_hsked;
-    
+    // assign lsu_o_wbck_data = {`XLEN{wbck_hsked}} & dtcm_rsp_rdata;
     wire fifo_i_ready;
     assign agu_cmd_ready = fifo_i_ready; //dtcm ready to accept new instruction when there is no existing outstand lsu instruction
     assign agu_rsp_valid = wbck_hsked;
@@ -55,7 +53,7 @@ module lsu_ctrl (
 
     //third pipeline stage
     //although OITF is 2 instructions deep, we only allow 1 outstanding instruction for lsu
-    wire [`ITAG_WIDTH-1:0] agu_cmd_fifo_data =    agu_cmd_itag;
+    wire [`ITAG_WIDTH-1:0] agu_cmd_fifo_data =  agu_cmd_itag;
     wire fifo_i_valid = agu_cmd_valid;
    
     wire fifo_o_valid;
@@ -63,19 +61,6 @@ module lsu_ctrl (
     wire [`ITAG_WIDTH-1:0] fifo_o_rdata;
     assign lsu_o_wbck_itag= {`ITAG_WIDTH{wbck_hsked}}&fifo_o_rdata;
   
-    // wire [2-1:0]  agu_rsp_size;
-    // assign agu_rsp_rdata = dtcm_rsp_rdata;
-    // wire rsp_lb  = (agu_rsp_size == 2'b00) ;
-    // wire rsp_lh  = (agu_rsp_size == 2'b01) ;
-    // wire rsp_lw  = (agu_rsp_size == 2'b10);
-
-    // wire[`XLEN-1:0] lsu_o_wbck_wdat;
-    // assign lsu_o_wbck_wdat   =  ( 
-    //        ({`XLEN{rsp_lb }} & {{24{agu_rsp_rdata[ 7]}}, agu_rsp_rdata[ 7:0]})
-    //       | ({`XLEN{rsp_lh }} & {{16{agu_rsp_rdata[15]}}, agu_rsp_rdata[15:0]}) 
-    //       | ({`XLEN{rsp_lw }} & agu_rsp_rdata[31:0]));
-
-    assign lsu_o_wbck_data = {`XLEN{wbck_hsked}} & dtcm_rsp_rdata;
     //Assume DTCM return data 1cycle later
     gnrl_pipe_stage #(
         .DW(`ITAG_WIDTH),
@@ -91,5 +76,18 @@ module lsu_ctrl (
         .rst_n(rst_n)
     );
 
-
+    wire [`XLEN-1:0] pre_agu_rsp_wdata;
+    assign pre_agu_rsp_wdata = dtcm_cmd_wdata;
+    wire [`ADDR_SIZE-1:0]   pre_agu_rsp_addr;
+    assign   pre_agu_rsp_addr = dtcm_cmd_addr;
+    
+   wire [2-1:0]     pre_agu_rsp_size;
+    wire rsp_lb  = (pre_agu_rsp_size == 2'b00);
+    wire rsp_lh  = (pre_agu_rsp_size == 2'b01);
+    wire rsp_lw  = (pre_agu_rsp_size == 2'b10);
+    wire [`XLEN-1:0] rdata_algn =  (pre_agu_rsp_wdata >> {pre_agu_rsp_addr[1:0],3'b0});
+    assign lsu_o_wbck_wdat   = 
+         (({`XLEN{rsp_lb }} & {{24{rdata_algn[ 7]}}, rdata_algn[ 7:0]})
+          | ({`XLEN{rsp_lh }} & {{16{rdata_algn[15]}}, rdata_algn[15:0]}) 
+          | ({`XLEN{rsp_lw }} & rdata_algn[31:0])) & {`XLEN{wbck_hsked}} ;
 endmodule
