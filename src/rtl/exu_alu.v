@@ -74,7 +74,8 @@ module exu_alu(
   output [`XLEN-1:0]             agu_cmd_wdata, 
   output [`XLEN/8-1:0] agu_cmd_wmask,
   output [1:0]                   agu_cmd_size,
-  output                         agu_cmd_back2agu, 
+  output                          agu_cmd_usign,
+  //output                         agu_cmd_back2agu, 
   output [`ITAG_WIDTH -1:0]       agu_cmd_itag,
   //    * Bus RSP channel
   input                          agu_rsp_valid,     // Response valid 
@@ -258,9 +259,9 @@ module exu_alu(
       .agu_cmd_read    (agu_cmd_read    ),
       .agu_cmd_wdata   (agu_cmd_wdata   ),
       .agu_cmd_wmask (agu_cmd_wmask),
-      //.agu_cmd_size    (agu_cmd_size    ),
+      .agu_cmd_size    (agu_cmd_size    ),
       //.agu_cmd_back2agu(agu_cmd_back2agu),
-      //.agu_cmd_usign   (agu_cmd_usign   ),
+      .agu_cmd_usign   (agu_cmd_usign   ),
       .agu_cmd_itag    (agu_cmd_itag    ),
       .agu_rsp_valid   (agu_rsp_valid   ),
       .agu_rsp_ready   (agu_rsp_ready   ),

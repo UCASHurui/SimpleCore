@@ -51,6 +51,8 @@ module exu (
     output [`ITAG_WIDTH-1:0] agu_cmd_itag,
     output [`XLEN-1:0] agu_cmd_wdata,
     output [`XLEN/8-1:0] agu_cmd_wmask,
+    output [1:0] agu_cmd_size,
+    output agu_cmd_usign,
     
     input agu_rsp_valid,
     output agu_rsp_ready,
@@ -239,8 +241,8 @@ exu_alu u_exu_alu (
     .agu_cmd_read(agu_cmd_read),//to lsu
     .agu_cmd_wdata(agu_cmd_wdata),//to lsu
     .agu_cmd_wmask(agu_cmd_wmask),//to lsu
-    .agu_cmd_size(),
-    .agu_cmd_back2agu(),
+    .agu_cmd_size(agu_cmd_size),//to lsu
+    .agu_cmd_usign(agu_cmd_usign),//to lsu
     .agu_cmd_itag(agu_cmd_itag),//to lsu
     .agu_rsp_valid(agu_rsp_valid),//from lsu
     .agu_rsp_ready(agu_rsp_ready),//to lsu

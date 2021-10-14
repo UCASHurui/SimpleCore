@@ -91,6 +91,8 @@ wire agu_cmd_read;
 wire [`ITAG_WIDTH-1:0] agu_cmd_itag;
 wire [`XLEN-1:0] agu_cmd_wdata;
 wire [`XLEN/8-1:0] agu_cmd_wmask;
+wire agu_cmd_usign;
+wire [1:0]  agu_cmd_size;
 wire agu_rsp_ready;
 wire lsu_o_valid;
 wire [`XLEN-1:0] lsu_o_wbck_wdat;
@@ -135,6 +137,8 @@ exu u_exu (
     .agu_cmd_itag(agu_cmd_itag),//to lsu
     .agu_cmd_wdata(agu_cmd_wdata),//to lsu
     .agu_cmd_wmask(agu_cmd_wmask),//to lsu
+    .agu_cmd_usign(agu_cmd_usign),//to lsu
+    .agu_cmd_size(agu_cmd_size),//to lsu
     .agu_rsp_valid(agu_rsp_valid),//from lsu
     .agu_rsp_ready(agu_rsp_ready),//to lsu
     .clk(clk),
@@ -155,6 +159,8 @@ lsu u_lsu (
     .agu_cmd_wdata(agu_cmd_wdata),//from exu
     .agu_cmd_wmask(agu_cmd_wmask),//from exu
     .agu_cmd_itag(agu_cmd_itag),//from exu
+    .agu_cmd_size(agu_cmd_size),//from exu
+    .agu_cmd_usign(agu_cmd_usign),// from exu
     .agu_rsp_valid(agu_rsp_valid),//to exu
     .agu_rsp_ready(agu_rsp_ready),//from exu
 
