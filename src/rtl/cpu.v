@@ -100,6 +100,8 @@ dtcm_ctrl u_dtcm_ctrl (
     .dtcm_ram_addr(dtcm_ram_addr),
     .dtcm_ram_wem(dtcm_ram_wem),
     .dtcm_ram_din(dtcm_ram_din),
-    .dtcm_ram_dout(dtcm_ram_dout)
+    .dtcm_ram_dout(dtcm_ram_dout),
+    .clk(clk),
+    .rst_n(rst_n)
 );
 endmodule
