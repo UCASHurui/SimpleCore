@@ -29,6 +29,8 @@ module exu_alu_lsuagu(
   output agu_o_valid,                               // Handshake valid
   input  agu_o_ready,                               // Handshake ready
   output [`XLEN-1:0] agu_o_wbck_wdat,
+  output agu_cmd_usign,
+  output [1:0] agu_cmd_size,
 
   // The Interface to LSU-ctrl
   output                  agu_cmd_valid,            // Handshake valid
@@ -39,8 +41,6 @@ module exu_alu_lsuagu(
   output [`XLEN-1:0]      agu_cmd_wdata,
   output [`XLEN/8-1:0] agu_cmd_wmask,
   output [`ITAG_WIDTH-1:0]agu_cmd_itag,
-  output agu_cmd_usign,
-  output [1:0] agu_cmd_size,
 
   //  Bus RSP channel
   input                        agu_rsp_valid,       // Response valid 
@@ -80,8 +80,8 @@ module exu_alu_lsuagu(
 
   //wire       agu_i_load    = agu_i_info [`DECINFO_AGU_LOAD   ] & (~flush_block);
   //wire       agu_i_store   = agu_i_info [`DECINFO_AGU_STORE  ] & (~flush_block);
-  wire       agu_i_load    = agu_i_info [`DECINFO_AGU_LOAD   ];
-  wire       agu_i_store   = agu_i_info [`DECINFO_AGU_STORE  ];
+wire       agu_i_load    = agu_i_info [`DECINFO_AGU_LOAD   ];
+wire       agu_i_store   = agu_i_info [`DECINFO_AGU_STORE  ];
   wire [1:0] agu_i_size    = agu_i_info [`DECINFO_AGU_SIZE   ];
   wire       agu_i_usign   = agu_i_info [`DECINFO_AGU_USIGN  ];
 
@@ -179,7 +179,7 @@ module exu_alu_lsuagu(
   assign agu_rsp_ready = 1'b1;
   
   assign agu_cmd_valid = agu_i_valid & agu_o_ready ;
-  assign agu_cmd_addr = agu_req_alu_res[`ADDR_SIZE-1:0];
+  assign agu_cmd_addr = agu_req_alu_res[`DTCM_ADDR_WIDTH-1:0];
 
   assign agu_cmd_read = agu_i_load;
      // The AGU CMD Wdata sources:
@@ -188,13 +188,12 @@ module exu_alu_lsuagu(
                                     ({`XLEN{agu_i_size_b }} & {4{agu_i_rs2[ 7:0]}})
                                   | ({`XLEN{agu_i_size_hw}} & {2{agu_i_rs2[15:0]}})
                                   | ({`XLEN{agu_i_size_w }} & {1{agu_i_rs2[31:0]}});
-  wire [`XLEN/8-1:0] algnst_wmask  = ({`XLEN/8{agu_i_size_b }} & (4'b0001 << agu_cmd_addr[1:0]))
-                        | ({`XLEN/8{agu_i_size_hw}} & (4'b0011 << {agu_cmd_addr[1],1'b0}))
-                        | ({`XLEN/8{agu_i_size_w }} & (4'b1111));
+  assign agu_cmd_wmask =             ({`XLEN/8{agu_i_size_b }} & (4'b0001 << agu_cmd_addr[1:0]))
+          | ({`XLEN/8{agu_i_size_hw}} & (4'b0011 << {agu_cmd_addr[1],1'b0}))
+          | ({`XLEN/8{agu_i_size_w }} & (4'b1111));
        
   assign agu_cmd_wdata = algnst_wdata;
   //assign agu_cmd_back2agu = 1'b0 ;
-  assign agu_cmd_wmask = algnst_wmask; 
            
   assign agu_cmd_itag     = agu_i_itag;
   assign agu_cmd_usign    = agu_i_usign;

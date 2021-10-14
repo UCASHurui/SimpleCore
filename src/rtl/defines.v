@@ -5,8 +5,6 @@
 `define RFIDX_WIDTH 5                                                   //regfile addr width
 `define INSTR_SIZE 32                                                   //instruction size
 `define RFREG_NUM 32                                                    // number of registers
-`define ADDR_SIZE   16
-`define FLEN 64
 
 
 //Decode info bus macros

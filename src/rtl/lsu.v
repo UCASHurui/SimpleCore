@@ -9,8 +9,7 @@ module lsu (
     //LSU write back interface
     output lsu_o_valid,
     input lsu_o_ready,
-
-    output [`XLEN-1:0] lsu_o_wbck_wdat,
+    output [`XLEN-1:0] lsu_o_wbck_data,
     output [`ITAG_WIDTH-1:0] lsu_o_wbck_itag,
     //the AGU  to LSU-ctrl interface
     input agu_cmd_valid,
@@ -43,7 +42,7 @@ module lsu (
 lsu_ctrl u_lsu_ctrl (
     .lsu_o_valid(lsu_o_valid),
     .lsu_o_ready(lsu_o_ready),
-    .lsu_o_wbck_wdat(lsu_o_wbck_wdat),
+    .lsu_o_wbck_data(lsu_o_wbck_data),
     .lsu_o_wbck_itag(lsu_o_wbck_itag),
     .agu_cmd_valid(agu_cmd_valid),
     .agu_cmd_ready(agu_cmd_ready),
@@ -52,11 +51,10 @@ lsu_ctrl u_lsu_ctrl (
     .agu_cmd_wdata(agu_cmd_wdata),
     .agu_cmd_wmask(agu_cmd_wmask),
     .agu_cmd_itag(agu_cmd_itag),
-    .agu_cmd_usign(agu_cmd_usign),
-    .agu_cmd_size(agu_cmd_usign),
+     .agu_cmd_usign(agu_cmd_usign),
+    .agu_cmd_size(agu_cmd_size),
     .agu_rsp_valid(agu_rsp_valid),
     .agu_rsp_ready(agu_rsp_ready),
- 
     .dtcm_cmd_valid(dtcm_cmd_valid),
     .dtcm_cmd_ready(dtcm_cmd_ready),
     .dtcm_cmd_read(dtcm_cmd_read),
@@ -68,7 +66,6 @@ lsu_ctrl u_lsu_ctrl (
     .dtcm_rsp_rdata(dtcm_rsp_rdata),
     .clk(clk),
     .rst_n(rst_n)
-    
 );
     
 endmodule

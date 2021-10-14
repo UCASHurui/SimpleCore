@@ -27,7 +27,7 @@ module exu (
     //LSU Write-Back interface
     input lsu_wbck_i_valid,
     output lsu_wbck_i_ready,
-    input [`XLEN-1:0] lsu_i_wbck_wdat,
+    input [`XLEN-1:0] lsu_wbck_i_data,
     input [`ITAG_WIDTH-1:0] lsu_wbck_i_itag,
     
     output oitf_empty,
@@ -49,10 +49,10 @@ module exu (
     output [`DTCM_ADDR_WIDTH-1:0] agu_cmd_addr,
     output agu_cmd_read,
     output [`ITAG_WIDTH-1:0] agu_cmd_itag,
-    output [`XLEN-1:0] agu_cmd_wdata,
-    output [`XLEN/8-1:0] agu_cmd_wmask,
     output [1:0] agu_cmd_size,
     output agu_cmd_usign,
+    output [`XLEN-1:0] agu_cmd_wdata,
+    output [`XLEN/8-1:0] agu_cmd_wmask,
     
     input agu_rsp_valid,
     output agu_rsp_ready,
@@ -241,8 +241,9 @@ exu_alu u_exu_alu (
     .agu_cmd_read(agu_cmd_read),//to lsu
     .agu_cmd_wdata(agu_cmd_wdata),//to lsu
     .agu_cmd_wmask(agu_cmd_wmask),//to lsu
-    .agu_cmd_size(agu_cmd_size),//to lsu
-    .agu_cmd_usign(agu_cmd_usign),//to lsu
+    .agu_cmd_size(agu_cmd_size),
+    .agu_cmd_usign(agu_cmd_usign),
+    // .agu_cmd_back2agu(),
     .agu_cmd_itag(agu_cmd_itag),//to lsu
     .agu_rsp_valid(agu_rsp_valid),//from lsu
     .agu_rsp_ready(agu_rsp_ready),//to lsu
@@ -300,15 +301,14 @@ exu_oitf u_exu_oitf (
 //instantiate longp
 wire longp_wbck_o_valid;
 wire [`XLEN-1:0] longp_wbck_o_data;
-wire [`XLEN-1:0] lsu_i_wbck_wdat ;
 wire [`RFIDX_WIDTH-1:0] longp_wbck_o_rdidx;
 wire longp_wbck_o_ready;
 
 exu_longpwbck u_exu_longpwbck (
     .lsu_wbck_i_valid(lsu_wbck_i_valid),//from lsu
     .lsu_wbck_i_ready(lsu_wbck_i_ready),//to lsu
+    .lsu_wbck_i_data(lsu_wbck_i_data),//from lsu
     .lsu_wbck_i_itag(lsu_wbck_i_itag),//from lsu
-    .lsu_wbck_i_wdat    (lsu_i_wbck_wdat  ),
     .longp_wbck_o_valid(longp_wbck_o_valid),//to wbck
     .longp_wbck_o_ready(longp_wbck_o_ready),//from wbck
     .longp_wbck_o_data(longp_wbck_o_data),//to wbck

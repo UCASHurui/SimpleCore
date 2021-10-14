@@ -10,9 +10,8 @@ module exu_longpwbck (
     //LSU write-back interface
     input lsu_wbck_i_valid,
     output lsu_wbck_i_ready,
-    input [`XLEN-1:0] lsu_wbck_i_wdat,
+    input [`XLEN-1:0] lsu_wbck_i_data,
     input [`ITAG_WIDTH-1:0] lsu_wbck_i_itag,
-
 
     //long pipe write back to final write back interface
     output longp_wbck_o_valid,
@@ -39,12 +38,8 @@ assign lsu_wback_i_ready = wbck_ready4lsu & wbck_i_ready;
 wire wbck_i_valid = lsu_wbck_i_valid;
 
 assign longp_wbck_o_valid = need_wbck & wbck_i_valid;
-
+assign longp_wbck_o_data = lsu_wbck_i_data;
 assign longp_wbck_o_rdidx = oitf_ret_rdidx;
 assign oitf_ret_ena = wbck_i_valid & wbck_i_ready;
-wire wbck_sel_lsu = lsu_wbck_i_valid & wbck_ready4lsu;
- wire [`FLEN-1:0] wbck_i_wdat;
-assign wbck_i_wdat  = ({`FLEN{wbck_sel_lsu}} & lsu_wbck_i_wdat );
-assign longp_wbck_o_data  = wbck_i_wdat ;
 endmodule
 
