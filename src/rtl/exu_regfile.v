@@ -39,5 +39,5 @@ generate
 endgenerate
 assign read_src1_data = rf_r[read_src1_idx];
 assign read_src2_data = rf_r[read_src2_idx];
-assign x1_r = rf_r[1];// accelerate x1
+assign x1_data = rf_r[1];// accelerate x1
 endmodule

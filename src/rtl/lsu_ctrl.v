@@ -70,7 +70,7 @@ module lsu_ctrl (
         .i_vld(fifo_i_valid),
         .i_rdy(fifo_i_ready),
         .i_dat(agu_cmd_itag),
-        .o_vld(dtcm_rsp_valid), //rsp valid from dtcm
+        .o_vld(fifo_o_valid), //rsp valid from dtcm//to check
         .o_rdy(fifo_o_ready),
         .o_dat(fifo_o_rdata),
         .clk(clk),
