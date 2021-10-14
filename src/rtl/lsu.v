@@ -19,6 +19,8 @@ module lsu (
     input [`XLEN-1:0] agu_cmd_wdata,
     input [`XLEN/8-1:0] agu_cmd_wmask,
     input [`ITAG_WIDTH-1:0] agu_cmd_itag,
+    input agu_cmd_usign,
+    input [1:0] agu_cmd_size,
     output agu_rsp_valid,
     input agu_rsp_ready,
 
@@ -49,6 +51,8 @@ lsu_ctrl u_lsu_ctrl (
     .agu_cmd_wdata(agu_cmd_wdata),
     .agu_cmd_wmask(agu_cmd_wmask),
     .agu_cmd_itag(agu_cmd_itag),
+    .agu_cmd_usign(agu_cmd_usign),
+    .agu_cmd_size(agu_cmd_usign),
     .agu_rsp_valid(agu_rsp_valid),
     .agu_rsp_ready(agu_rsp_ready),
     .dtcm_cmd_valid(dtcm_cmd_valid),

@@ -20,6 +20,8 @@ module lsu_ctrl (
     input [`XLEN-1:0] agu_cmd_wdata,
     input [`XLEN/8-1:0] agu_cmd_wmask,
     input [`ITAG_WIDTH-1:0] agu_cmd_itag,
+    input agu_cmd_usign,
+    input [1:0] agu_cmd_size,
     output agu_rsp_valid,
     input agu_rsp_ready,
 
@@ -53,26 +55,37 @@ module lsu_ctrl (
 
     //third pipeline stage
     //although OITF is 2 instructions deep, we only allow 1 outstanding instruction for lsu
-    wire [`ITAG_WIDTH-1:0] agu_cmd_fifo_data = 
-        agu_cmd_itag;
+    wire [`ITAG_WIDTH+4-1:0] agu_cmd_fifo_data = 
+                                                                                {agu_cmd_itag, 
+                                                                                agu_cmd_read, 
+                                                                                agu_cmd_usign, 
+                                                                                agu_cmd_size};
     wire fifo_i_valid = agu_cmd_valid;
    
     wire fifo_o_valid;
     wire fifo_o_ready = 1'b1;
-    wire [`ITAG_WIDTH-1:0] fifo_o_rdata;
-    assign lsu_o_wbck_itag= {`ITAG_WIDTH{wbck_hsked}}&fifo_o_rdata;
+    wire [`ITAG_WIDTH+4-1:0] agu_cmd_fifo_data_o;
+    assign lsu_o_wbck_itag= {`ITAG_WIDTH{wbck_hsked}} & agu_cmd_fifo_data_o;
+    wire [`ITAG_WIDTH-1:0] agu_cmd_itag_o;
+    wire agu_cmd_read_o;
+    wire [1:0] agu_cmd_size_o;
+    wire agu_cmd_usign_o;
+    assign {agu_cmd_itag_o,
+                agu_cmd_read_o,
+                agu_cmd_usign_o,
+                agu_cmd_size_o} = agu_cmd_fifo_data_o;
   
     //Assume DTCM return data 1cycle later
     gnrl_pipe_stage #(
-        .DW(`ITAG_WIDTH),
-        .DP(1)
+        .DW(`ITAG_WIDTH+4),
+        .DP(1)//although OITF is 2 instructions deep, we only allow 1 outstanding instruction for lsu
     ) u_lsu_pipe_stage (
         .i_vld(fifo_i_valid),
         .i_rdy(fifo_i_ready),
-        .i_dat(agu_cmd_itag),
+        .i_dat(agu_cmd_fifo_data),
         .o_vld(fifo_o_valid), //rsp valid from dtcm//to check
         .o_rdy(fifo_o_ready),
-        .o_dat(fifo_o_rdata),
+        .o_dat(agu_cmd_fifo_data_o),
         .clk(clk),
         .rst_n(rst_n)
     );

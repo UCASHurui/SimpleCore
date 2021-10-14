@@ -39,6 +39,8 @@ module exu_alu_lsuagu(
   output [`XLEN-1:0]      agu_cmd_wdata,
   output [`XLEN/8-1:0] agu_cmd_wmask,
   output [`ITAG_WIDTH-1:0]agu_cmd_itag,
+  output agu_cmd_usign,
+  output [1:0] agu_cmd_size,
 
   //  Bus RSP channel
   input                        agu_rsp_valid,       // Response valid 
@@ -194,6 +196,6 @@ wire       agu_i_store   = agu_i_info [`DECINFO_AGU_STORE  ];
   //assign agu_cmd_back2agu = 1'b0 ;
            
   assign agu_cmd_itag     = agu_i_itag;
-  //assign agu_cmd_usign    = agu_i_usign;
-  //assign agu_cmd_size     = agu_i_size;
+  assign agu_cmd_usign    = agu_i_usign;
+  assign agu_cmd_size     = agu_i_size;
 endmodule       
