@@ -98,7 +98,8 @@ module ifu_ifetch(
    //if-ex interface
    wire pc_hold_req = (~ifu_o_hsked) | bpu_wait;//handshake with exu failed or hazard
    wire [`INSTR_SIZE-1:0] ifu_ir_r;
-   wire [`INSTR_SIZE-1:0] ifu_ir_nxt = (bpu_wait & ifu_o_hsked)? `INSTR_NOP:ifu_rsp_instr;//inject nop when current instruction is accepted by exu and bpu_wait asserted
+   wire instr_nop_req = bpu_wait & ifu_o_hsked;
+   wire [`INSTR_SIZE-1:0] ifu_ir_nxt = instr_nop_req ? `INSTR_NOP:ifu_rsp_instr;//inject nop when current instruction is accepted by exu and bpu_wait asserted
    wire [`PC_SIZE-1:0] ifu_pc_nxt = pc_r;
    wire [`PC_SIZE-1:0] ifu_pc_r;
    wire [`RFIDX_WIDTH-1:0] ir_rs1idx_r;

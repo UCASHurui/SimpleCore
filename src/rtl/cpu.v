@@ -82,7 +82,9 @@ itcm_ctrl u_itcm_ctrl (
     .itcm_ram_addr(itcm_ram_addr),
     .itcm_ram_wem(itcm_ram_wem),
     .itcm_ram_din(itcm_ram_din),
-    .itcm_ram_dout(itcm_ram_dout)
+    .itcm_ram_dout(itcm_ram_dout),
+    .clk(clk),
+    .rst_n(rst_n)
 );
 
 //instantiate dtcm_ctrl
