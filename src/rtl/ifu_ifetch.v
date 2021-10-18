@@ -34,8 +34,8 @@ module ifu_ifetch(
    input  clk,
    input  rst_n
 );
-   reg [`PC_SIZE-1:0] pc; 
-   wire [`PC_SIZE-1:0] pc_r = pc;
+//   reg [`PC_SIZE-1:0] pc; 
+   wire [`PC_SIZE-1:0] pc_r;
    wire prdt_taken;
    wire ir_nop_instr_r;
    //instantiate minidec
@@ -90,11 +90,6 @@ module ifu_ifetch(
       .clk                      (clk  ) ,
       .rst_n                    (rst_n )                 
    );
-//   wire pc_vld_r;
-//   wire pc_vld_nxt = 1'b1;
-//   gnrl_dfflr #(1) pc_vld_dfflr(1'b1, pc_vld_nxt, pc_vld_r, clk, rst_n);
-//   assign pc_vld = pc_vld_r;
-   
    wire ifu_o_hsked = (ifu_o_valid & ifu_o_ready);//instruction accepted by exu
    assign ifu_req_valid = ifu_o_hsked;
    wire ifu_req_hsked  = (ifu_req_valid & ifu_req_ready);
@@ -107,7 +102,6 @@ module ifu_ifetch(
  //    * rst_n is de-asserted 
   wire reset_flag_r;
   gnrl_dffrs #(1) reset_flag_dffrs (1'b0, reset_flag_r, clk, rst_n);
- 
  // The reset_req valid is set when 
  //    * Currently reset_flag is asserting
  // The reset_req valid is clear when 
@@ -118,9 +112,7 @@ module ifu_ifetch(
   wire reset_req_clr = reset_req_r & ifu_req_hsked;
   wire reset_req_ena = reset_req_set | reset_req_clr;
   wire reset_req_nxt = reset_req_set | (~reset_req_clr);
-
   gnrl_dfflr #(1) reset_req_dfflr (reset_req_ena, reset_req_nxt, reset_req_r, clk, rst_n);
-
   wire ifu_reset_req = reset_req_r;
 
    //if-ex interface
@@ -174,22 +166,7 @@ module ifu_ifetch(
 
    wire [`PC_SIZE-1:0] pc_nxt_pre = pc_add_op1 + pc_add_op2;
    wire [`PC_SIZE-1:0] pc_nxt = {pc_nxt_pre[`PC_SIZE-1:2],2'b00};
-   always @(posedge clk or negedge rst_n) begin
-      if(rst_n == 1'b0) begin
-         pc <= pc_rtvec;
-      end
-//      else begin
-//        pc <= pc_nxt;
-//      end
-      else if(ifu_o_hsked == 1'b1) begin
-        pc <= pc_nxt;
-      end
-      else begin
-        pc <= pc;
-      end
-   end
-    
-   //assign ifu_req_last_pc = pc_r;
+   gnrl_dfflr #(`PC_SIZE) pc_dfflr (1'b1, pc_nxt, pc_r, clk, rst_n);
    assign ifu_rsp_ready = 1'b1;
    assign inspect_pc = pc_r;
    assign ifu_req_pc = pc_nxt;
