@@ -29,6 +29,8 @@ module exu_alu_lsuagu(
   output agu_o_valid,                               // Handshake valid
   input  agu_o_ready,                               // Handshake ready
   output [`XLEN-1:0] agu_o_wbck_wdat,
+  output agu_cmd_usign,
+  output [1:0] agu_cmd_size,
 
   // The Interface to LSU-ctrl
   output                  agu_cmd_valid,            // Handshake valid
@@ -39,8 +41,6 @@ module exu_alu_lsuagu(
   output [`XLEN-1:0]      agu_cmd_wdata,
   output [`XLEN/8-1:0] agu_cmd_wmask,
   output [`ITAG_WIDTH-1:0]agu_cmd_itag,
-  output agu_cmd_usign,
-  output [1:0] agu_cmd_size,
 
   //  Bus RSP channel
   input                        agu_rsp_valid,       // Response valid 

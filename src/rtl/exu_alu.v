@@ -82,7 +82,6 @@ module exu_alu(
   output                         agu_rsp_ready,     // Response ready
   input  [`XLEN-1:0]             agu_rsp_rdata,
 
-
   input  clk,
   input  rst_n
   );

@@ -1,8 +1,3 @@
-//=================================================
-//Description: itcm ctrl module
-//Author : Hurui
-//Modules: itcm_ctrl
-//=================================================
 `include "defines.v"
 
 module itcm_ctrl (
