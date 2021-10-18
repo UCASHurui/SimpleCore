@@ -37,6 +37,6 @@ module itcm_ctrl (
     wire ifu2itcm_rsp_valid_set = ifu2itcm_cmd_valid;
     wire ifu2itcm_rsp_valid_clr = ifu2itcm_rsp_valid;
     wire ifu2itcm_rsp_valid_nxt = ifu2itcm_rsp_valid_set | (~ifu2itcm_rsp_valid_clr);
-    wire ifu2itcm_rsp_valid_ena = 1'b1;
+    wire ifu2itcm_rsp_valid_ena = ifu2itcm_rsp_valid_set | ifu2itcm_rsp_valid_clr;
     gnrl_dfflr #(1) ifu2itcm_rsp_valid_dfflr(ifu2itcm_rsp_valid_ena, ifu2itcm_rsp_valid_nxt, ifu2itcm_rsp_valid, clk, rst_n);
 endmodule
