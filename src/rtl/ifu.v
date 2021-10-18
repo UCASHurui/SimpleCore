@@ -27,9 +27,8 @@
 `include "defines.v"
 
 module ifu (
-    output [`PC_SIZE-1:0] inspect_pc,
-    input [`PC_SIZE-1:0] pc_rtvec,
-   
+   output [`PC_SIZE-1:0] inspect_pc,
+   input [`PC_SIZE-1:0] pc_rtvec,
   // The IR stage to EXU interface
   output [`INSTR_SIZE-1:0] ifu_o_ir,// The instruction register
   output [`PC_SIZE-1:0] ifu_o_pc,   // The PC register along with
@@ -76,10 +75,12 @@ module ifu (
   wire ifu_rsp_valid; 
   wire ifu_rsp_ready; 
   wire [`INSTR_SIZE-1:0] ifu_rsp_instr; 
-
+  //wire pc_vld;
+  
   ifu_ifetch u_ifu_ifetch(
     .inspect_pc   (inspect_pc),
     .pc_rtvec      (pc_rtvec),  
+   // .pc_vld        (pc_vld),
     .ifu_req_valid (ifu_req_valid),
     .ifu_req_ready (ifu_req_ready),
     .ifu_req_pc    (ifu_req_pc   ),
@@ -112,6 +113,7 @@ module ifu (
     .ifu_req_valid (ifu_req_valid),
     .ifu_req_ready (ifu_req_ready),
     .ifu_req_pc    (ifu_req_pc),
+    //.ifu_req_pc_valid(pc_vld),
     .ifu_rsp_valid (ifu_rsp_valid),
     .ifu_rsp_ready (ifu_rsp_ready),
     .ifu_rsp_instr (ifu_rsp_instr),

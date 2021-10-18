@@ -28,6 +28,6 @@ assign brchmis_flush_req = cmt_i_valid & brchmis_need_flush;
 assign cmt_i_ready = (~cmt_i_bjp) | 
                                    (brchmis_need_flush? brchmis_flush_ack:1'b1);
 
-assign brchmis_flush_add_op1  = cmt_i_pc;
+assign brchmis_flush_add_op1    = cmt_i_pc;
 assign brchmis_flush_add_op2 = cmt_i_bjp_prdt? `PC_SIZE'd4:cmt_i_imm[`PC_SIZE-1:0];
 endmodule 

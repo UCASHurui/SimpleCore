@@ -4,6 +4,7 @@
 module ifu_ifetch(
    output[`PC_SIZE-1:0] inspect_pc,
    input  [`PC_SIZE-1:0] pc_rtvec,
+   //output pc_vld,
    output ifu_req_valid, 
    input  ifu_req_ready,
    output [`PC_SIZE-1:0] ifu_req_pc,
@@ -33,8 +34,8 @@ module ifu_ifetch(
    input  clk,
    input  rst_n
 );
-   reg [`PC_SIZE-1:0] pc; 
-   wire [`PC_SIZE-1:0] pc_r = pc;
+//   reg [`PC_SIZE-1:0] pc; 
+   wire [`PC_SIZE-1:0] pc_r;
    wire prdt_taken;
    wire ir_nop_instr_r;
    //instantiate minidec
@@ -95,21 +96,24 @@ module ifu_ifetch(
    wire ifu_rsp_hsked  = (ifu_rsp_valid & ifu_rsp_ready);
    assign pipe_flush_ack = 1'b1;//always accept pipeflush
 
-
-   wire reset_flag_r;
-   gnrl_dffrs #(1) reset_flag_dffrs (1'b0, reset_flag_r, clk, rst_n);
-   // The reset_req valid is set when 
-   //    * Currently reset_flag is asserting
-   // The reset_req valid is clear when 
-   //    * Currently reset_req is asserting
-   //    * Currently the flush can be accepted by IFU
-   wire reset_req_r;
-   wire reset_req_set = (~reset_req_r) & reset_flag_r;
-   wire reset_req_clr = reset_req_r & ifu_req_hsked;
-   wire reset_req_ena = reset_req_set | reset_req_clr;
-   wire reset_req_nxt = reset_req_set | (~reset_req_clr);
-   gnrl_dfflr #(1) reset_req_dfflr (reset_req_ena, reset_req_nxt, reset_req_r, clk, rst_n);
-   wire ifu_reset_req = reset_req_r;
+ // The rst_flag is the synced version of rst_n
+ //    * rst_n is asserted 
+ // The rst_flag will be clear when
+ //    * rst_n is de-asserted 
+  wire reset_flag_r;
+  gnrl_dffrs #(1) reset_flag_dffrs (1'b0, reset_flag_r, clk, rst_n);
+ // The reset_req valid is set when 
+ //    * Currently reset_flag is asserting
+ // The reset_req valid is clear when 
+ //    * Currently reset_req is asserting
+ //    * Currently the flush can be accepted by IFU
+  wire reset_req_r;
+  wire reset_req_set = (~reset_req_r) & reset_flag_r;
+  wire reset_req_clr = reset_req_r & ifu_req_hsked;
+  wire reset_req_ena = reset_req_set | reset_req_clr;
+  wire reset_req_nxt = reset_req_set | (~reset_req_clr);
+  gnrl_dfflr #(1) reset_req_dfflr (reset_req_ena, reset_req_nxt, reset_req_r, clk, rst_n);
+  wire ifu_reset_req = reset_req_r;
 
    //if-ex interface
    wire pc_hold_req = (~ifu_o_hsked) | bpu_wait;//handshake with exu failed or hazard
@@ -165,3 +169,4 @@ module ifu_ifetch(
    assign inspect_pc = pc_r;
    assign ifu_req_pc = pc_nxt;
    endmodule
+
