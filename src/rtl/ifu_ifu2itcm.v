@@ -12,6 +12,7 @@ module ifu_ifu2itcm(
   input  ifu_req_valid, // Handshake valid
   output ifu_req_ready, // Handshake ready
   input  [`PC_SIZE-1:0] ifu_req_pc, // Fetch PC
+  //input ifu_req_pc_valid,
   output ifu_rsp_valid, // to ifu
   input  ifu_rsp_ready, // from ifu
   output [`INSTR_SIZE-1:0] ifu_rsp_instr, // Response instruction
@@ -24,7 +25,7 @@ module ifu_ifu2itcm(
   input  [`ITCM_RAM_DW-1:0] ifu2itcm_rsp_rdata
 );
   
-  assign ifu2itcm_cmd_valid = ifu_req_valid;
+  assign ifu2itcm_cmd_valid = ifu_req_valid;//
   assign ifu_req_ready = ifu2itcm_cmd_ready;
   assign ifu2itcm_cmd_addr = ifu_req_pc[`ITCM_ADDR_WIDTH-1:0];//to check
   assign ifu_rsp_valid = ifu2itcm_rsp_valid;

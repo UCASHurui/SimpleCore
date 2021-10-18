@@ -4,6 +4,7 @@
 module ifu_ifetch(
    output[`PC_SIZE-1:0] inspect_pc,
    input  [`PC_SIZE-1:0] pc_rtvec,
+   //output pc_vld,
    output ifu_req_valid, 
    input  ifu_req_ready,
    output [`PC_SIZE-1:0] ifu_req_pc,
@@ -89,16 +90,43 @@ module ifu_ifetch(
       .clk                      (clk  ) ,
       .rst_n                    (rst_n )                 
    );
+//   wire pc_vld_r;
+//   wire pc_vld_nxt = 1'b1;
+//   gnrl_dfflr #(1) pc_vld_dfflr(1'b1, pc_vld_nxt, pc_vld_r, clk, rst_n);
+//   assign pc_vld = pc_vld_r;
+   
    wire ifu_o_hsked = (ifu_o_valid & ifu_o_ready);//instruction accepted by exu
    assign ifu_req_valid = ifu_o_hsked;
    wire ifu_req_hsked  = (ifu_req_valid & ifu_req_ready);
    wire ifu_rsp_hsked  = (ifu_rsp_valid & ifu_rsp_ready);
    assign pipe_flush_ack = 1'b1;//always accept pipeflush
 
+ // The rst_flag is the synced version of rst_n
+ //    * rst_n is asserted 
+ // The rst_flag will be clear when
+ //    * rst_n is de-asserted 
+  wire reset_flag_r;
+  gnrl_dffrs #(1) reset_flag_dffrs (1'b0, reset_flag_r, clk, rst_n);
+ 
+ // The reset_req valid is set when 
+ //    * Currently reset_flag is asserting
+ // The reset_req valid is clear when 
+ //    * Currently reset_req is asserting
+ //    * Currently the flush can be accepted by IFU
+  wire reset_req_r;
+  wire reset_req_set = (~reset_req_r) & reset_flag_r;
+  wire reset_req_clr = reset_req_r & ifu_req_hsked;
+  wire reset_req_ena = reset_req_set | reset_req_clr;
+  wire reset_req_nxt = reset_req_set | (~reset_req_clr);
+
+  gnrl_dfflr #(1) reset_req_dfflr (reset_req_ena, reset_req_nxt, reset_req_r, clk, rst_n);
+
+  wire ifu_reset_req = reset_req_r;
+
    //if-ex interface
    wire pc_hold_req = (~ifu_o_hsked) | bpu_wait;//handshake with exu failed or hazard
    wire [`INSTR_SIZE-1:0] ifu_ir_r;
-   wire instr_nop_req = bpu_wait & ifu_o_hsked;
+   wire instr_nop_req = (bpu_wait & ifu_o_hsked) | pipe_flush_req;
    wire [`INSTR_SIZE-1:0] ifu_ir_nxt = instr_nop_req ? `INSTR_NOP:ifu_rsp_instr;//inject nop when current instruction is accepted by exu and bpu_wait asserted
    wire [`PC_SIZE-1:0] ifu_pc_nxt = pc_r;
    wire [`PC_SIZE-1:0] ifu_pc_r;
@@ -107,11 +135,11 @@ module ifu_ifetch(
    
    wire ifu_prdt_taken_r;
    //ifu_pc, rs1idx, rs2idx, prdt_taken allowed to change once the instruction is accepted by exu
-   gnrl_dfflr #(`PC_SIZE) ifu_pc_dfflr (ifu_o_hsked, ifu_pc_nxt,  ifu_pc_r, clk, rst_n);
-   gnrl_dfflr #(`RFIDX_WIDTH) ifu_rs1idx_dfflr (ifu_o_hsked, minidec_rs1idx,  ir_rs1idx_r, clk, rst_n);
-   gnrl_dfflr #(`RFIDX_WIDTH) ifu_rs2idx_dfflr (ifu_o_hsked, minidec_rs2idx,  ir_rs2idx_r, clk, rst_n);
-   gnrl_dfflr #(1) ifu_prdt_taken_dfflr (ifu_o_hsked, prdt_taken, ifu_prdt_taken_r, clk, rst_n);
-   gnrl_dfflr #(`INSTR_SIZE) ifu_ir_dfflr (ifu_o_hsked, ifu_ir_nxt, ifu_ir_r, clk, rst_n);
+   gnrl_dfflr #(`PC_SIZE) ifu_pc_dfflr (ifu_rsp_valid, ifu_pc_nxt,  ifu_pc_r, clk, rst_n);
+   gnrl_dfflr #(`RFIDX_WIDTH) ifu_rs1idx_dfflr (ifu_rsp_valid, minidec_rs1idx,  ir_rs1idx_r, clk, rst_n);
+   gnrl_dfflr #(`RFIDX_WIDTH) ifu_rs2idx_dfflr (ifu_rsp_valid, minidec_rs2idx,  ir_rs2idx_r, clk, rst_n);
+   gnrl_dfflr #(1) ifu_prdt_taken_dfflr (ifu_rsp_valid, prdt_taken, ifu_prdt_taken_r, clk, rst_n);
+   gnrl_dfflr #(`INSTR_SIZE) ifu_ir_dfflr (ifu_rsp_valid, ifu_ir_nxt, ifu_ir_r, clk, rst_n);
    assign ifu_o_ir  = ifu_ir_r;//output to exu
    assign ifu_o_pc  = ifu_pc_r;//ouput to exu
    // ir_nop_instr register(pipeling bubble)
@@ -120,22 +148,24 @@ module ifu_ifetch(
    wire ir_nop_instr_clr = ir_nop_instr_r;
    wire ir_nop_instr_nxt = ir_nop_instr_set | (~ir_nop_instr_clr);
    
-   gnrl_dfflr #(1) ir_nop_instr_dfflr (ifu_o_hsked, ir_nop_instr_nxt, ir_nop_instr_r, clk, rst_n);
+   gnrl_dfflr #(1) ir_nop_instr_dfflr (ifu_rsp_valid, ir_nop_instr_nxt, ir_nop_instr_r, clk, rst_n);
 
    assign ifu_o_rs1idx = ir_rs1idx_r;
    assign ifu_o_rs2idx = ir_rs2idx_r;
    assign ifu_o_prdt_taken = ifu_prdt_taken_r;
-   assign ifu_o_valid  = 1'b1;
+   assign ifu_o_valid  = ~reset_flag_r;
 
    // Next PC generation
    wire bjp_req = minidec_bjp & prdt_taken;
    wire [`PC_SIZE-1:0] pc_add_op1 = 
+                                 reset_req_r ? pc_rtvec:
                                  pc_hold_req   ? pc_r :
                                  pipe_flush_req  ? pipe_flush_add_op1 :
                                  bjp_req ? prdt_pc_add_op1    :
                                                    pc_r;
 
    wire [`PC_SIZE-1:0] pc_add_op2 =  
+                                 reset_req_r ? `PC_SIZE'b0:
                                  pc_hold_req   ? `PC_SIZE'b0 :
                                  pipe_flush_req  ? pipe_flush_add_op2 :
                                  bjp_req ? prdt_pc_add_op2    :
@@ -148,14 +178,20 @@ module ifu_ifetch(
       if(rst_n == 1'b0) begin
          pc <= pc_rtvec;
       end
-      else begin
+//      else begin
+//        pc <= pc_nxt;
+//      end
+      else if(ifu_o_hsked == 1'b1) begin
         pc <= pc_nxt;
+      end
+      else begin
+        pc <= pc;
       end
    end
     
    //assign ifu_req_last_pc = pc_r;
    assign ifu_rsp_ready = 1'b1;
    assign inspect_pc = pc_r;
-   assign ifu_req_pc = pc_r;
+   assign ifu_req_pc = pc_nxt;
    endmodule
 
