@@ -34,7 +34,7 @@ wire wbck_ready4lsu = (lsu_wbck_i_itag == oitf_ret_ptr) & (~oitf_empty);
 // The final arbitrated Write-back interface
 wire need_wbck = oitf_ret_rdwen;
 wire wbck_i_ready = need_wbck? longp_wbck_o_ready:1'b1;
-assign lsu_wback_i_ready = wbck_ready4lsu & wbck_i_ready;
+assign lsu_wbck_i_ready = wbck_ready4lsu & wbck_i_ready;
 wire wbck_i_valid = lsu_wbck_i_valid;
 
 assign longp_wbck_o_valid = need_wbck & wbck_i_valid;
