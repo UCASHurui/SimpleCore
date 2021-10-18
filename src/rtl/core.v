@@ -121,9 +121,9 @@ exu u_exu (
     .oitf_empty(oitf_empty),//to ifu
     .rf2ifu_x1(rf2ifu_x1),//to ifu
     .rf2ifu_rs1(rf2ifu_rs1),//to ifu
-    .dec2ifu_rden(dec2ifu_rden),//to exu
-    .dec2ifu_rs1en(dec2ifu_rs1en),//to exu
-    .dec2ifu_rdidx(dec2ifu_rdidx),//to exu
+    .dec2ifu_rden(dec2ifu_rden),//to ifu
+    .dec2ifu_rs1en(dec2ifu_rs1en),//to ifu
+    .dec2ifu_rdidx(dec2ifu_rdidx),//to ifu
     //.dec2_ifu_mulhsu(),
     //.dec2_ifu_div(),
     //.dec2_ifu_rem(),

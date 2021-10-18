@@ -44,6 +44,6 @@ module dtcm_ctrl (
     wire lsu2dtcm_rsp_valid_set = lsu2dtcm_cmd_valid;
     wire lsu2dtcm_rsp_valid_clr = lsu2dtcm_rsp_valid_r;
     wire lsu2dtcm_rsp_valid_nxt = lsu2dtcm_rsp_valid_set | (~lsu2dtcm_rsp_valid_clr);
-    wire lsu2dtcm_rsp_valid_ena = 1'b1;
+    wire lsu2dtcm_rsp_valid_ena = lsu2dtcm_rsp_valid_set | lsu2dtcm_rsp_valid_clr;
     gnrl_dfflr #(1) lsu2dtcm_rsp_valid_dfflr(lsu2dtcm_rsp_valid_ena, lsu2dtcm_rsp_valid_nxt, lsu2dtcm_rsp_valid_r, clk, rst_n);
 endmodule
