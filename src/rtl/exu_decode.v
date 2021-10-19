@@ -92,7 +92,7 @@ wire rv32_jal = opcode_4_2_011 & opcode_6_5_11;
 wire rv32_jalr = opcode_4_2_001 & opcode_6_5_11;
 
 wire rv32_branch = opcode_4_2_000 & opcode_6_5_11;
-wire rv32_load = opcode_4_2_000 & opcode_6_5_00;
+wire rv32_load = opcode_4_2_000 & opcode_6_5_00 & opcode_1_0_11;
 wire rv32_store = opcode_4_2_000 & opcode_6_5_01;
 wire rv32_op_imm = opcode_4_2_100 & opcode_6_5_00;
 wire rv32_op = opcode_4_2_100 & opcode_6_5_01;//including muldiv

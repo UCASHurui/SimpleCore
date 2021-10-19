@@ -93,7 +93,7 @@ module ifu_ifetch(
    );
 
    wire ifu_o_hsked = (ifu_o_valid & ifu_o_ready);             //instruction accepted by exu
-   assign ifu_req_valid = ifu_o_hsked;
+   assign ifu_req_valid = ~reset_flag_r;
    wire ifu_req_hsked  = (ifu_req_valid & ifu_req_ready);
    wire ifu_rsp_hsked  = (ifu_rsp_valid & ifu_rsp_ready);
    assign pipe_flush_ack = 1'b1;                               //always accept pipeflush
@@ -124,15 +124,14 @@ module ifu_ifetch(
    wire [`PC_SIZE-1:0] ifu_pc_r;
    wire [`RFIDX_WIDTH-1:0] ir_rs1idx_r;
    wire [`RFIDX_WIDTH-1:0] ir_rs2idx_r;
-   
    wire ifu_prdt_taken_r;
-
+   wire ifu_exu_ena = ifu_o_hsked;
    //ifu_pc, rs1idx, rs2idx, prdt_taken allowed to change once the instruction is accepted by exu
-   gnrl_dfflr #(`PC_SIZE) ifu_pc_dfflr (ifu_rsp_valid, ifu_pc_nxt,  ifu_pc_r, clk, rst_n);
-   gnrl_dfflr #(`RFIDX_WIDTH) ifu_rs1idx_dfflr (ifu_rsp_valid, minidec_rs1idx,  ir_rs1idx_r, clk, rst_n);
-   gnrl_dfflr #(`RFIDX_WIDTH) ifu_rs2idx_dfflr (ifu_rsp_valid, minidec_rs2idx,  ir_rs2idx_r, clk, rst_n);
-   gnrl_dfflr #(1) ifu_prdt_taken_dfflr (ifu_rsp_valid, prdt_taken, ifu_prdt_taken_r, clk, rst_n);
-   gnrl_dfflr #(`INSTR_SIZE) ifu_ir_dfflr (ifu_rsp_valid, ifu_ir_nxt, ifu_ir_r, clk, rst_n);
+   gnrl_dfflr #(`PC_SIZE) ifu_pc_dfflr (ifu_exu_ena, ifu_pc_nxt,  ifu_pc_r, clk, rst_n);
+   gnrl_dfflr #(`RFIDX_WIDTH) ifu_rs1idx_dfflr (ifu_exu_ena, minidec_rs1idx,  ir_rs1idx_r, clk, rst_n);
+   gnrl_dfflr #(`RFIDX_WIDTH) ifu_rs2idx_dfflr (ifu_exu_ena, minidec_rs2idx,  ir_rs2idx_r, clk, rst_n);
+   gnrl_dfflr #(1) ifu_prdt_taken_dfflr (ifu_exu_ena, prdt_taken, ifu_prdt_taken_r, clk, rst_n);
+   gnrl_dfflr #(`INSTR_SIZE) ifu_ir_dfflr (ifu_exu_ena, ifu_ir_nxt, ifu_ir_r, clk, rst_n);
    assign ifu_o_ir  = ifu_ir_r;           //output to exu
    assign ifu_o_pc  = ifu_pc_r;           //ouput to exu
    
