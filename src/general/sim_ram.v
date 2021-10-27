@@ -75,7 +75,7 @@ module sim_ram#(
         end
     endgenerate
             
-
+    /*
     initial begin
         if (ITCM==1) begin
             mem_r[1] = 32'b0000000_00000_00000_000_00001_011_0111;//lui x1, 0x0000_0000
@@ -95,4 +95,5 @@ module sim_ram#(
            mem_r[3] = 32'b00000001_00000001_00000001_00000001;//0x1111
        end
    end
+   */
 endmodule

@@ -20,7 +20,7 @@ module tb_cpu_top;
         pc_rtvec = `PC_SIZE'h0000_0080;
         #30 rst_n = 1;
         @(posedge clk)
-        #50000 $finish;
+        #8000 $finish;
     end 
     reg[31:0] instr_in;
     integer i;
