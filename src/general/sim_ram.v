@@ -39,18 +39,18 @@ module sim_ram#(
     end
   
     genvar i;
-    generate
-        for(i = 0; i<MW; i = i + 1) begin
-            if((8*i+8) > DW) begin
+    generate 
+        for(i = 0; i<MW; i = i + 1) begin: simramloop
+            if((8*i+8) > DW) begin: lastbyte
                 always @(posedge clk) begin
-                    if (wen[i]) begin
+                    if (wen[i]) begin: maskenabled
                         mem_r[addr][DW-1:8*i] <= din[DW-1:8*i];
                     end
                 end
             end
-            else begin
+            else begin: nonlastbytes
                 always @(posedge clk) begin
-                    if (wen[i]) begin
+                    if (wen[i]) begin: maskdisabeled
                         mem_r[addr][8*i+7:8*i] <= din[8*i+7:8*i];
                     end
                 end
