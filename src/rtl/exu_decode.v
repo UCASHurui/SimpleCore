@@ -165,7 +165,7 @@ wire alu_op = //(~rv32_shamt_illegal) &
                 | rv32_op_imm
                 | (rv32_op & ~func7_0000001) //exclude muldiv
                 );
-
+wire need_imm;
 wire [`DECINFO_ALU_WIDTH-1:0] alu_info_bus;
 assign alu_info_bus[`DECINFO_GRP] = `DECINFO_GRP_ALU;
 assign alu_info_bus[`DECINFO_ALU_ADD] = rv32_add | rv32_addi | rv32_auipc;
@@ -235,7 +235,7 @@ wire rv32_imm_sel_s = rv32_store;
 wire rv32_imm_sel_b = rv32_branch;
 wire rv32_imm_sel_u = rv32_lui | rv32_auipc;
 wire rv32_imm_sel_j = rv32_jal;
-wire need_imm = ~rv32_op;
+assign need_imm = ~rv32_op;
 wire[`XLEN-1:0] rv32_i_imm =  {{20{i_instr[31]}},i_instr[31:20]};
 wire[`XLEN-1:0] rv32_s_imm = {{20{i_instr[31]}},i_instr[31], i_instr[30:25],i_instr[11:8], i_instr[7]};
 wire[`XLEN-1:0] rv32_b_imm = {{20{i_instr[31]}},
