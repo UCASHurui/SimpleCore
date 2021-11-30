@@ -38,20 +38,6 @@ module exu_decode (
     output [`XLEN-1:0] dec_bjp_imm
 );
 
-//=================================================
-//regfile related signals
-wire need_rs1 = ~(rv32_lui | rv32_auipc | rv32_jal) ;
-wire need_rs2 = rv32_branch | rv32_store | rv32_op;
-wire need_rd = ~(rv32_branch | rv32_store);
-
-wire[`RFIDX_WIDTH-1:0] rs1_idx = i_instr[19:15];
-wire[`RFIDX_WIDTH-1:0] rs2_idx = i_instr[24:20];
-wire[`RFIDX_WIDTH-1:0] rd_idx = i_instr[11:7];
-wire rs1_x0 = rs1_idx == {`RFIDX_WIDTH{1'b0}};
-wire rd_x0 = rd_idx == {`RFIDX_WIDTH{1'b0}};
-wire rs1_x31 = rs1_idx == {`RFIDX_WIDTH{1'b1}};
-wire rs2_x31 = rs1_idx == {`RFIDX_WIDTH{1'b1}};
-wire rd_x31 = rd_idx == {`RFIDX_WIDTH{1'b1}};
 
 //=================================================
 //opcode & func3 & func7 signals
@@ -96,6 +82,21 @@ wire rv32_load = opcode_4_2_000 & opcode_6_5_00 & opcode_1_0_11;
 wire rv32_store = opcode_4_2_000 & opcode_6_5_01;
 wire rv32_op_imm = opcode_4_2_100 & opcode_6_5_00;
 wire rv32_op = opcode_4_2_100 & opcode_6_5_01;//including muldiv
+
+//=================================================
+//regfile related signals
+wire need_rs1 = ~(rv32_lui | rv32_auipc | rv32_jal) ;
+wire need_rs2 = rv32_branch | rv32_store | rv32_op;
+wire need_rd = ~(rv32_branch | rv32_store);
+
+wire[`RFIDX_WIDTH-1:0] rs1_idx = i_instr[19:15];
+wire[`RFIDX_WIDTH-1:0] rs2_idx = i_instr[24:20];
+wire[`RFIDX_WIDTH-1:0] rd_idx = i_instr[11:7];
+wire rs1_x0 = rs1_idx == {`RFIDX_WIDTH{1'b0}};
+wire rd_x0 = rd_idx == {`RFIDX_WIDTH{1'b0}};
+wire rs1_x31 = rs1_idx == {`RFIDX_WIDTH{1'b1}};
+wire rs2_x31 = rs1_idx == {`RFIDX_WIDTH{1'b1}};
+wire rd_x31 = rd_idx == {`RFIDX_WIDTH{1'b1}};
 
 //=================================================
 //branch instructions

@@ -92,6 +92,7 @@ module ifu_ifetch(
       .rst_n                        (rst_n )                 
    );
 
+   wire reset_flag_r;
    wire ifu_o_hsked = (ifu_o_valid & ifu_o_ready);             //instruction accepted by exu
    assign ifu_req_valid = ~reset_flag_r;
    wire ifu_req_hsked  = (ifu_req_valid & ifu_req_ready);
@@ -100,7 +101,6 @@ module ifu_ifetch(
 
  // The rst_flag is the synced version of rst_n. rst_n is asserted. 
  // The rst_flag will be clear when rst_n is de-asserted 
-  wire reset_flag_r;
   gnrl_dffrs #(1) reset_flag_dffrs (1'b0, reset_flag_r, clk, rst_n);
 
 
