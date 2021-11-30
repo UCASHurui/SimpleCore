@@ -2,7 +2,6 @@
 `include "defines.v"
 
 module ifu_ifetch(
-   output[`PC_SIZE-1:0] inspect_pc,             //unused
    input  [`PC_SIZE-1:0] pc_rtvec,              //init pc
    //output pc_vld,
    output ifu_req_valid, 
@@ -169,7 +168,6 @@ module ifu_ifetch(
    wire [`PC_SIZE-1:0] pc_nxt = {pc_nxt_pre[`PC_SIZE-1:2],2'b00};
    gnrl_dfflr #(`PC_SIZE) pc_dfflr (1'b1, pc_nxt, pc_r, clk, rst_n);
    assign ifu_rsp_ready = 1'b1;
-   assign inspect_pc = pc_r;
    assign ifu_req_pc = pc_nxt;
    endmodule
 

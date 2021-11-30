@@ -6,7 +6,6 @@
 `include "defines.v"
 
 module core (
-    output [`PC_SIZE-1:0] inspect_pc, // unused.
     input [`PC_SIZE-1:0] pc_rtvec,    // init pc.
     //ifu to itcm interface
     output ifu2itcm_cmd_valid,    
@@ -54,7 +53,6 @@ wire dec2ifu_rs1en;
 wire [`RFIDX_WIDTH-1:0] dec2ifu_rdidx;
 
 ifu u_ifu (
-    .inspect_pc(inspect_pc),                    //unused
     .pc_rtvec(pc_rtvec),                        //from input. init pc reg
     .ifu_o_ir(ifu_o_ir),                        //to exu
     .ifu_o_pc(ifu_o_pc),                        //to exu
