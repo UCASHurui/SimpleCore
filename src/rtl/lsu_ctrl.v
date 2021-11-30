@@ -68,7 +68,7 @@ module lsu_ctrl (
    
     wire fifo_o_valid;
     wire fifo_o_ready = 1'b1;
-    wire [`ITAG_WIDTH+4-1:0] agu_cmd_fifo_data_o;
+    wire [`ITAG_WIDTH+6-1:0] agu_cmd_fifo_data_o;
     assign lsu_o_wbck_itag= {`ITAG_WIDTH{wbck_hsked}} & agu_cmd_fifo_data_o;
     wire [`ITAG_WIDTH-1:0] agu_cmd_itag_o;
     wire agu_cmd_read_o;

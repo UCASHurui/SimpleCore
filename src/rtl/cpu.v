@@ -6,14 +6,10 @@
 `include "defines.v"
 
 module cpu (
-    output [`PC_SIZE-1:0] inspect_pc,
     input [`PC_SIZE-1:0] pc_rtvec,
     //SRAM interface
     //ITCM SRAM
-    output itcm_ram_we,
     output [`ITCM_RAM_AW-1:0] itcm_ram_addr,
-    output [`ITCM_RAM_DW-1:0] itcm_ram_din,
-    output [`ITCM_RAM_MW-1:0] itcm_ram_wem,
     input [`ITCM_RAM_DW-1:0] itcm_ram_dout,
     //DTCM SRAM
     output dtcm_ram_we,
@@ -28,9 +24,6 @@ module cpu (
 wire ifu2itcm_cmd_valid;
 wire ifu2itcm_cmd_ready;
 wire [`ITCM_ADDR_WIDTH-1:0] ifu2itcm_cmd_addr;
-wire ifu2itcm_cmd_read = 1'b1;//ifu not allowed to write itcm
-wire [`ITCM_RAM_DW-1:0] ifu2itcm_cmd_wdata = {`ITCM_RAM_DW{1'b0}}; //ifu not allowed to write itcm
-wire [`ITCM_RAM_MW-1:0] ifu2itcm_cmd_wmask = {`ITCM_RAM_MW{1'b0}}; //ifu not allowed to write itcm
 wire ifu2itcm_rsp_valid;
 wire ifu2itcm_rsp_ready;
 wire [`ITCM_RAM_DW-1:0] ifu2itcm_rsp_rdata;
@@ -46,7 +39,6 @@ wire lsu2dtcm_rsp_ready;
 wire [`DTCM_RAM_DW-1:0] lsu2dtcm_rsp_rdata;
 //instantiate core
 core u_core (
-    .inspect_pc(inspect_pc),
     .pc_rtvec(pc_rtvec),
     .ifu2itcm_cmd_valid(ifu2itcm_cmd_valid),
     .ifu2itcm_cmd_ready(ifu2itcm_cmd_ready),
@@ -71,17 +63,11 @@ core u_core (
 itcm_ctrl u_itcm_ctrl (
     .ifu2itcm_cmd_valid(ifu2itcm_cmd_valid),
     .ifu2itcm_cmd_ready(ifu2itcm_cmd_ready),
-    .ifu2itcm_cmd_read(ifu2itcm_cmd_read),
     .ifu2itcm_cmd_addr(ifu2itcm_cmd_addr),
-    .ifu2itcm_cmd_wmask(ifu2itcm_cmd_wmask),
-    .ifu2itcm_cmd_wdata(ifu2itcm_cmd_wdata),
     .ifu2itcm_rsp_valid(ifu2itcm_rsp_valid),
     .ifu2itcm_rsp_ready(ifu2itcm_rsp_ready),
     .ifu2itcm_rsp_rdata(ifu2itcm_rsp_rdata),
-    .itcm_ram_we(itcm_ram_we),
     .itcm_ram_addr(itcm_ram_addr),
-    .itcm_ram_wem(itcm_ram_wem),
-    .itcm_ram_din(itcm_ram_din),
     .itcm_ram_dout(itcm_ram_dout),
     .clk(clk),
     .rst_n(rst_n)
